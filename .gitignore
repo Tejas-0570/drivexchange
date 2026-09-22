@@ -1,0 +1,8 @@
+# Ignore Eclipse/STS workspace metadata
+.metadata/
+RemoteSystemsTempFiles/
+.recommenders/
+
+# Ignore OS-generated files
+Thumbs.db
+.DS_Store
