@@ -1,6 +1,6 @@
 package com.drivexchange.dao;
 
-import java.util.UUID;
+import java.util.Set;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,6 +34,7 @@ public class UserDao implements UserService{
 		u.setName(request.name());
 		u.setEmail(request.email());
 		u.setPassword(passwordEncoder.encode(request.password()));
+		u.setRole(Set.of("USER"));
 		
 		userRepository.save(u);
 		

@@ -1,4 +1,4 @@
-package com.drivexchange.dao;
+package com.drivexchange.dto;
 
 public record MessageResponse(String message) {
 
