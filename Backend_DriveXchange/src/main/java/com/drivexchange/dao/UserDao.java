@@ -2,9 +2,11 @@ package com.drivexchange.dao;
 
 import java.util.Set;
 
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.drivexchange.dto.CurrentUserProfile;
 import com.drivexchange.dto.RegisterRequest;
 import com.drivexchange.entity.UserEntity;
 import com.drivexchange.exceptions.UserAlreadyExistsException;
@@ -38,6 +40,19 @@ public class UserDao implements UserService{
 		
 		userRepository.save(u);
 		
+	}
+
+	@Override
+	public CurrentUserProfile getUserProfileByEmail(String email) {
+		UserEntity u = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+		
+		
+		return new CurrentUserProfile(
+				u.getId(),
+				u.getName(),
+				u.getEmail(),
+				u.getRole()
+		);
 	}
 
 }
