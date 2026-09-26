@@ -14,12 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.drivexchange.dto.ApiErrorResponse;
+import com.drivexchange.dto.ApiResponse;
 import com.drivexchange.dto.LoginRequest;
 import com.drivexchange.dto.LoginResponse;
-import com.drivexchange.dto.MessageResponse;
 import com.drivexchange.dto.RegisterRequest;
-import com.drivexchange.exceptions.UserAlreadyExistsException;
 import com.drivexchange.security.JwtUtil;
 import com.drivexchange.service.UserService;
 
@@ -29,9 +27,9 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 	
-	private UserService userService;
-	private JwtUtil jwtUtil;
-	private AuthenticationManager authenticationManager;
+	private final UserService userService;
+	private final JwtUtil jwtUtil;
+	private final AuthenticationManager authenticationManager;
 	
 	public AuthController(UserService userService, JwtUtil jwtUtil, AuthenticationManager authenticationManager) {
 		this.userService = userService;
@@ -40,35 +38,31 @@ public class AuthController {
 	}
 	
 	@PostMapping("/register")
-	public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request){
+	public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody RegisterRequest request){
 		
-		try {
-			userService.register(request);
-			return new ResponseEntity<>(new MessageResponse("User Registered Successfully"), HttpStatus.CREATED);
-		} catch (UserAlreadyExistsException e) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiErrorResponse(e.getMessage()));
-		}
+		userService.register(request);
+		ApiResponse<Void> response = ApiResponse.success(HttpStatus.CREATED.value(), "User Registered Successfully", null);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 		
 	}
 	
 	@PostMapping("/login")
-	public ResponseEntity<?> login(@RequestBody LoginRequest request){
+	public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody LoginRequest request){
 		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(request.email(), request.password());
 		
-		try {
-			Authentication authenticationResponse = authenticationManager.authenticate(authToken);
+		Authentication authenticationResponse = authenticationManager.authenticate(authToken);
 			
-			List<String> roleList = authenticationResponse.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+		List<String> roleList = authenticationResponse.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 			
-			String email = authenticationResponse.getName();
+		String email = authenticationResponse.getName();
 			
-			String jwtToken = jwtUtil.generateToken(email, Map.of("roles", roleList));
+		String jwtToken = jwtUtil.generateToken(email, Map.of("roles", roleList));
+		
+		LoginResponse loginData = new LoginResponse("Bearer", jwtToken);
+		
+		ApiResponse<LoginResponse> response = ApiResponse.success(HttpStatus.OK.value(), "Login Successfull", loginData);
 			
-			return ResponseEntity.ok(new LoginResponse(jwtToken, "Login Successful"));
-		} catch (Exception e) {
-			ApiErrorResponse errorBody = new ApiErrorResponse("Invalid email or password");
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorBody);
-		}
+		return ResponseEntity.ok(response);
 		
 	}
 }
