@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.drivexchange.dto.CurrentUserProfile;
 import com.drivexchange.dto.RegisterRequest;
+import com.drivexchange.dto.UpdateUser;
+import com.drivexchange.dto.UpdatedUserResponse;
 import com.drivexchange.entity.UserEntity;
 import com.drivexchange.exceptions.UserAlreadyExistsException;
 import com.drivexchange.repo.UserRepository;
@@ -53,6 +55,21 @@ public class UserDao implements UserService{
 				u.getEmail(),
 				u.getRole()
 		);
+	}
+
+	@Override
+	public UpdatedUserResponse updateUser(String email, UpdateUser user) {
+		
+		UserEntity u = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+		
+		u.setName(user.name());
+		u.setMobile(user.mobile());
+		
+		UserEntity updatedUser = userRepository.save(u);
+				
+		return new UpdatedUserResponse(updatedUser.getId(), updatedUser.getName(), updatedUser.getEmail(), updatedUser.getMobile(), updatedUser.getRole());
+		
+		
 	}
 
 }

@@ -41,6 +41,7 @@ public class UserEntity {
 	@Column(name = "role")
 	private Set<String> role;
 	
+	private String mobile;
 	
 	private LocalDateTime createdAt;
 	public UUID getId() {
@@ -73,6 +74,13 @@ public class UserEntity {
 	public void setRole(Set<String> role) {
 		this.role = role;
 	}
+	
+	public String getMobile() {
+		return mobile;
+	}
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
 	public LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
@@ -81,10 +89,11 @@ public class UserEntity {
 	}
 	
 	
+	
 	@Override
 	public String toString() {
 		return "UserEntity [id=" + id + ", name=" + name + ", email=" + email + ", password=" + password + ", role="
-				+ role + ", createdAt=" + createdAt + "]";
+				+ role + ", mobileNo=" + mobile + ", createdAt=" + createdAt + "]";
 	}
 	@PrePersist
 	protected void onCreate() {
