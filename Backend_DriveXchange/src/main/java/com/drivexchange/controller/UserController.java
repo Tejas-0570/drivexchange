@@ -47,8 +47,8 @@ public class UserController {
 		
 		UpdatedUserResponse updatedResopnse = userService.updateUser(email, user);
 		
-		ApiResponse<UpdatedUserResponse> response = ApiResponse.success(HttpStatus.ACCEPTED.value(), "User Updated", updatedResopnse);
+		ApiResponse<UpdatedUserResponse> response = ApiResponse.success(HttpStatus.OK.value(), "User Updated", updatedResopnse);
 		
-		return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }
