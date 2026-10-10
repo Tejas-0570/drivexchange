@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import AuthLayout, {
   Field,
   PasswordField,
@@ -10,6 +10,7 @@ import AuthLayout, {
   MailIcon,
   UserIcon,
 } from "../components/AuthLayout";
+import { useAuth } from "../context/AuthContext";
 
 const strengthLabels = ["Too weak", "Weak", "Fair", "Good", "Strong"];
 const strengthColors = ["bg-[#e6e2da]", "bg-red-400", "bg-orange-400", "bg-yellow-400", "bg-[#0f9d8a]"];
@@ -25,14 +26,17 @@ const getStrength = (p) => {
 };
 
 const Signup = () => {
+  const { register, isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
-    role: "buyer",
     name: "",
     email: "",
     password: "",
     terms: false,
   });
   const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const update = (key) => (e) =>
@@ -46,7 +50,7 @@ const Signup = () => {
   const validate = () => {
     const next = {};
     if (form.name.trim().length < 2) next.name = "Enter your full name";
-    if (!/^\S+@\S+\.\S+$/.test(form.email)) next.email = "Enter a valid email address";
+    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) next.email = "Enter a valid email address";
     if (form.password.length < 8) next.password = "Use at least 8 characters";
     if (!form.terms) next.terms = "Please accept the terms to continue";
     return next;
@@ -54,16 +58,40 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setServerError("");
+
     const next = validate();
     setErrors(next);
     if (Object.keys(next).length) return;
 
     setLoading(true);
-    // TODO: replace with your real signup API call
-    await new Promise((r) => setTimeout(r, 1200));
-    console.log("signup", form);
-    setLoading(false);
+    try {
+      // POST /api/v1/auth/register  (saves the user in the database)
+      await register({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+      });
+
+      // account created -> send them to the login page (email pre-filled)
+      navigate("/login", {
+        replace: true,
+        state: { registered: true, email: form.email.trim() },
+      });
+    } catch (err) {
+      if (err.status === 409) {
+        // UserAlreadyExistsException (adjust the status if yours differs)
+        setErrors({ email: "An account with this email already exists" });
+      } else {
+        setServerError(err.message || "Something went wrong. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // already logged in (or just finished signing up) -> go home
+  if (isLoggedIn) return <Navigate to="/" replace />;
 
   return (
     <AuthLayout
@@ -79,14 +107,13 @@ const Signup = () => {
         </p>
       </Reveal>
 
-      <form onSubmit={handleSubmit} noValidate className="mt-7 space-y-5">
-
-        <Reveal delay={110}>
+      <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
+        <Reveal delay={80}>
           <Field
             id="name"
             label="Full name"
             autoComplete="name"
-            placeholder="Tejas Waydande"
+            placeholder="Jordan Smith"
             icon={<UserIcon />}
             value={form.name}
             onChange={update("name")}
@@ -94,7 +121,7 @@ const Signup = () => {
           />
         </Reveal>
 
-        <Reveal delay={160}>
+        <Reveal delay={140}>
           <Field
             id="email"
             label="Email address"
@@ -108,7 +135,7 @@ const Signup = () => {
           />
         </Reveal>
 
-        <Reveal delay={210}>
+        <Reveal delay={200}>
           <PasswordField
             id="password"
             label="Password"
@@ -133,13 +160,14 @@ const Signup = () => {
                 ))}
               </div>
               <p className="mt-1.5 text-xs text-[#8c8c8c]">
-                Password strength: <span className="font-medium text-[#1c1c1e]">{strengthLabels[strength]}</span>
+                Password strength:{" "}
+                <span className="font-medium text-[#1c1c1e]">{strengthLabels[strength]}</span>
               </p>
             </div>
           )}
         </Reveal>
 
-        <Reveal delay={260}>
+        <Reveal delay={250}>
           <label className="flex cursor-pointer items-start gap-2.5 text-sm text-[#5f5f5f]">
             <input
               type="checkbox"
@@ -157,14 +185,24 @@ const Signup = () => {
           {errors.terms && <p className="mt-1.5 text-xs text-red-500">{errors.terms}</p>}
         </Reveal>
 
-        <Reveal delay={310}>
+        {/* error coming from the server */}
+        {serverError && (
+          <div
+            role="alert"
+            className="auth-fade rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
+          >
+            {serverError}
+          </div>
+        )}
+
+        <Reveal delay={300}>
           <SubmitButton loading={loading}>
             {loading ? "Creating account..." : "Create Account"}
           </SubmitButton>
         </Reveal>
       </form>
 
-      <Reveal delay={360}>
+      <Reveal delay={350}>
         <OrDivider />
         <GoogleButton>Sign up with Google</GoogleButton>
 

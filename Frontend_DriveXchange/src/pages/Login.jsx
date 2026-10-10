@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import AuthLayout, {
   Field,
   PasswordField,
@@ -9,10 +9,25 @@ import AuthLayout, {
   Reveal,
   MailIcon,
 } from "../components/AuthLayout";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
-  const [form, setForm] = useState({ email: "", password: "", remember: true });
+  const { login, isLoggedIn } = useAuth();
+  const location = useLocation();
+
+  // ProtectedRoute stores where the user was heading; default is home
+  const redirectTo = location.state?.from?.pathname ?? "/";
+
+  // coming from Signup: show a success message and pre-fill the email
+  const justRegistered = location.state?.registered === true;
+
+  const [form, setForm] = useState({
+    email: location.state?.email ?? "",
+    password: "",
+    remember: true,
+  });
   const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const update = (key) => (e) =>
@@ -23,23 +38,35 @@ const Login = () => {
 
   const validate = () => {
     const next = {};
-    if (!/^\S+@\S+\.\S+$/.test(form.email)) next.email = "Enter a valid email address";
+    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) next.email = "Enter a valid email address";
     if (!form.password) next.password = "Enter your password";
     return next;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setServerError("");
+
     const next = validate();
     setErrors(next);
     if (Object.keys(next).length) return;
 
     setLoading(true);
-    // TODO: replace with your real login API call
-    await new Promise((r) => setTimeout(r, 1200));
-    console.log("login", form);
-    setLoading(false);
+    try {
+      await login(form.email.trim(), form.password, form.remember);
+      // success: isLoggedIn becomes true and the <Navigate> below redirects
+    } catch (err) {
+      if ([400, 401, 403].includes(err.status)) {
+        setServerError("Invalid email or password");
+      } else {
+        setServerError(err.message || "Something went wrong. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (isLoggedIn) return <Navigate to={redirectTo} replace />;
 
   return (
     <AuthLayout
@@ -54,6 +81,18 @@ const Login = () => {
           Log in to manage your listings, offers and invoices.
         </p>
       </Reveal>
+
+      {justRegistered && (
+        <div
+          role="status"
+          className="auth-fade mt-6 flex items-start gap-3 rounded-xl border border-[#bfe3dd] bg-[#e3f1ef] px-4 py-3 text-sm text-[#0f766e]"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="mt-0.5 shrink-0">
+            <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1.2 14.2l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4-7 7z" />
+          </svg>
+          Account created successfully! Please log in to continue.
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
         <Reveal delay={80}>
@@ -96,6 +135,15 @@ const Login = () => {
             Forgot password?
           </Link>
         </Reveal>
+
+        {serverError && (
+          <div
+            role="alert"
+            className="auth-fade rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
+          >
+            {serverError}
+          </div>
+        )}
 
         <Reveal delay={260}>
           <SubmitButton loading={loading}>{loading ? "Logging in..." : "Log In"}</SubmitButton>
