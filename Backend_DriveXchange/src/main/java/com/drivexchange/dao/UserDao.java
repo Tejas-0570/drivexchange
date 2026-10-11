@@ -72,4 +72,11 @@ public class UserDao implements UserService{
 		
 	}
 
+	@Override
+	public UserEntity getUserEntityByEmail(String email) {
+		return userRepository.findByEmail(email)
+	            .orElseThrow(() ->
+	                new RuntimeException("User not found"));
+	}
+
 }

@@ -25,7 +25,7 @@ public class CarEntity {
 	
 	// 1. The Core Identity (The absolute essentials)
 	@Column(name = "vin")
-	private String VIN;
+	private String vin;
 	
 	@Column(name = "brand")
 	private String brand;
@@ -34,7 +34,7 @@ public class CarEntity {
 	private String model;
 	
 	@Column(name = "manufactured_year")
-	private int manufacturedYear;
+	private int manufactured_year;
 	
 	
 	// 2. Market & Operational Details
@@ -49,10 +49,10 @@ public class CarEntity {
 	
 	// 3. Technical & Mechanical Specifications
 	@Column(name = "fuel_type")
-	private String fuelType;
+	private String fuel_type;
 	
 	@Column(name = "transmission_type")
-	private String transmissionType;
+	private String transmission_type;
 	
 	// 4. Aesthetics & Condition Metrics
 	@Column(name = "color")
@@ -61,7 +61,7 @@ public class CarEntity {
 	
 	// 5. Media & Narrative Content
 	@Column(name = "title_header")
-	private String titleHeader;
+	private String title_header;
 	
 	@Column(name = "description")
 	private String description;
@@ -83,12 +83,12 @@ public class CarEntity {
 		this.id = id;
 	}
 
-	public String getVIN() {
-		return VIN;
+	public String getVin() {
+		return vin;
 	}
 
-	public void setVIN(String vIN) {
-		VIN = vIN;
+	public void setVin(String vin) {
+		this.vin = vin;
 	}
 
 	public String getBrand() {
@@ -107,12 +107,12 @@ public class CarEntity {
 		this.model = model;
 	}
 
-	public int getManufacturedYear() {
-		return manufacturedYear;
+	public int getManufactured_year() {
+		return manufactured_year;
 	}
 
-	public void setManufacturedYear(int manufacturedYear) {
-		this.manufacturedYear = manufacturedYear;
+	public void setManufactured_year(int manufactured_year) {
+		this.manufactured_year = manufactured_year;
 	}
 
 	public int getPrice() {
@@ -139,20 +139,20 @@ public class CarEntity {
 		this.status = status;
 	}
 
-	public String getFuelType() {
-		return fuelType;
+	public String getFuel_type() {
+		return fuel_type;
 	}
 
-	public void setFuelType(String fuelType) {
-		this.fuelType = fuelType;
+	public void setFuel_type(String fuel_type) {
+		this.fuel_type = fuel_type;
 	}
 
-	public String getTransmissionType() {
-		return transmissionType;
+	public String getTransmission_type() {
+		return transmission_type;
 	}
 
-	public void setTransmissionType(String transmissionType) {
-		this.transmissionType = transmissionType;
+	public void setTransmission_type(String transmission_type) {
+		this.transmission_type = transmission_type;
 	}
 
 	public String getColor() {
@@ -163,12 +163,12 @@ public class CarEntity {
 		this.color = color;
 	}
 
-	public String getTitleHeader() {
-		return titleHeader;
+	public String getTitle_header() {
+		return title_header;
 	}
 
-	public void setTitleHeader(String titleHeader) {
-		this.titleHeader = titleHeader;
+	public void setTitle_header(String title_header) {
+		this.title_header = title_header;
 	}
 
 	public String getDescription() {
@@ -197,11 +197,16 @@ public class CarEntity {
 
 	@Override
 	public String toString() {
-		return "CarEntity [id=" + id + ", VIN=" + VIN + ", brand=" + brand + ", model=" + model + ", manufacturedYear="
-				+ manufacturedYear + ", price=" + price + ", mileage=" + mileage + ", status=" + status + ", fuelType="
-				+ fuelType + ", transmissionType=" + transmissionType + ", color=" + color + ", titleHeader="
-				+ titleHeader + ", description=" + description + ", photUrls=" + photUrls + ", user=" + user + "]";
+		return "CarEntity [id=" + id + ", vin=" + vin + ", brand=" + brand + ", model=" + model + ", manufactured_year="
+				+ manufactured_year + ", price=" + price + ", mileage=" + mileage + ", status=" + status
+				+ ", fuel_type=" + fuel_type + ", transmission_type=" + transmission_type + ", color=" + color
+				+ ", title_header=" + title_header + ", description=" + description + ", photUrls=" + photUrls
+				+ ", user=" + user + "]";
 	}
+
+
+
+	
 	
 	
 }
