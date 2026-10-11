@@ -19,7 +19,11 @@ const Login = () => {
   const redirectTo = location.state?.from?.pathname ?? "/";
 
   // coming from Signup: show a success message and pre-fill the email
-  const justRegistered = location.state?.registered === true;
+  const notice =
+    location.state?.notice ??
+    (location.state?.registered === true
+      ? "Account created successfully! Please log in to continue."
+      : null);
 
   const [form, setForm] = useState({
     email: location.state?.email ?? "",
@@ -82,7 +86,7 @@ const Login = () => {
         </p>
       </Reveal>
 
-      {justRegistered && (
+      {notice && (
         <div
           role="status"
           className="auth-fade mt-6 flex items-start gap-3 rounded-xl border border-[#bfe3dd] bg-[#e3f1ef] px-4 py-3 text-sm text-[#0f766e]"
@@ -90,7 +94,7 @@ const Login = () => {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="mt-0.5 shrink-0">
             <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1.2 14.2l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4-7 7z" />
           </svg>
-          Account created successfully! Please log in to continue.
+          {notice}
         </div>
       )}
 

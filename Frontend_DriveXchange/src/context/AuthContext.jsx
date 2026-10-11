@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { ApiError, apiFetch, TOKEN_KEY, tokenStorage } from "../api/api";
+import { getProfile } from "../api/dashboardApi";
 
 const AuthContext = createContext(null);
 
@@ -53,6 +54,17 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => tokenStorage.get());
   const user = useMemo(() => readUser(token), [token]);
 
+  // full profile from the database (name, mobile, createdAt, ...)
+  const [profile, setProfile] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState("");
+
+  const logout = useCallback(() => {
+    tokenStorage.clear();
+    setToken(null);
+    setProfile(null);
+  }, []);
+
   // stored token is broken or expired -> clean it up
   useEffect(() => {
     if (token && !user) {
@@ -70,6 +82,36 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
+  /* ---- load the logged-in user's profile from the database ---- */
+  const refreshProfile = useCallback(async () => {
+    setProfileLoading(true);
+    setProfileError("");
+    try {
+      const fresh = await getProfile();
+      setProfile(fresh);
+      return fresh;
+    } catch (err) {
+      if (err.status === 401) {
+        logout(); // server says the token is no longer valid
+      } else {
+        setProfileError(err.message || "Could not load your profile.");
+      }
+      return null;
+    } finally {
+      setProfileLoading(false);
+    }
+  }, [logout]);
+
+  // whenever someone logs in (token appears) fetch their profile
+  useEffect(() => {
+    if (token && user) {
+      refreshProfile();
+    } else {
+      setProfile(null);
+    }
+  }, [token, user, refreshProfile]);
+
+  /* ---- auth actions ---- */
   const login = useCallback(async (email, password, remember = true) => {
     const body = await apiFetch("/api/v1/auth/login", {
       method: "POST",
@@ -93,22 +135,22 @@ export function AuthProvider({ children }) {
     });
   }, []);
 
-  const logout = useCallback(() => {
-    tokenStorage.clear();
-    setToken(null);
-  }, []);
-
   const value = useMemo(
     () => ({
       token,
       user,
+      profile,
+      profileLoading,
+      profileError,
+      setProfile,
+      refreshProfile,
       isLoggedIn: Boolean(user),
-      isAdmin: user?.roles?.includes("ROLE_ADMIN") ?? false,
+      isAdmin: user?.roles?.some((r) => /ADMIN/i.test(r)) ?? false,
       login,
       register,
       logout,
     }),
-    [token, user, login, register, logout]
+    [token, user, profile, profileLoading, profileError, refreshProfile, login, register, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

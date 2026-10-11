@@ -31,7 +31,7 @@ const NavLink = ({ href, className, onClick, children }) =>
 
 /* ---------------- avatar + dropdown (logged-in state) ---------------- */
 function ProfileMenu() {
-  const { user, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -50,7 +50,7 @@ function ProfileMenu() {
     };
   }, []);
 
-  const initial = (user?.name || user?.email || "U")[0].toUpperCase();
+  const initial = (profile?.name || user?.email || "U")[0].toUpperCase();
 
   const handleLogout = () => {
     setOpen(false);
@@ -77,8 +77,8 @@ function ProfileMenu() {
           className="absolute right-0 top-full mt-3 w-60 overflow-hidden rounded-2xl border border-[#efece6] bg-white shadow-[0_16px_40px_rgba(30,25,15,0.14)]"
         >
           <div className="border-b border-[#efece6] px-4 py-3">
-            <p className="text-xs text-[#8c8c8c]">Signed in as</p>
-            <p className="truncate text-sm font-semibold text-[#1c1c1e]">{user?.email}</p>
+            <p className="truncate text-sm font-semibold text-[#1c1c1e]">{profile?.name || "Welcome"}</p>
+            <p className="truncate text-xs text-[#8c8c8c]">{user?.email}</p>
           </div>
 
           <Link
