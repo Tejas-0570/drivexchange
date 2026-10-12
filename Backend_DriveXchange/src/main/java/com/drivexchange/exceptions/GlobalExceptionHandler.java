@@ -51,6 +51,13 @@ public class GlobalExceptionHandler {
         // FIX: Clean execution without inference warnings
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
+    
+    // 4. Handle Car Already Exist Exception
+    @ExceptionHandler(CarAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCarAlreadyExist(CarAlreadyExistsException e){
+    	ApiResponse<Void> response = ApiResponse.error(HttpStatus.CONFLICT.value(), "A car with this VIN is already listed");
+    	return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
 	
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception e){

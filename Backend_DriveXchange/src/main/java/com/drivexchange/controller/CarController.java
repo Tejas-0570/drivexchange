@@ -38,9 +38,8 @@ public class CarController {
 		String email = userDetails.getUsername();
 		
 		UserEntity user = userService.getUserEntityByEmail(email);
-		
 		car.setUser(user);
-		
+				
 		carService.ListCar(car);
 		ApiResponse<Void> response = ApiResponse.success(HttpStatus.CREATED.value(), "Car Listed Successfully", null);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);

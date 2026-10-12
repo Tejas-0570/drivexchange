@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.drivexchange.dto.MyCarResponse;
 import com.drivexchange.entity.CarEntity;
+import com.drivexchange.exceptions.CarAlreadyExistsException;
 import com.drivexchange.repo.CarRepository;
 import com.drivexchange.service.CarService;
 
@@ -21,6 +22,9 @@ public class CarDao implements CarService{
 
 	@Override
 	public void ListCar(CarEntity car) {
+		if(carRepository.findByVin(car.getVin()).isPresent()) {
+			throw new CarAlreadyExistsException("Car Already Exists with this VIN");
+		}
 		carRepository.save(car);
 	}
 
@@ -28,5 +32,6 @@ public class CarDao implements CarService{
 	public List<MyCarResponse> getCarsByOwnerEmail(String email) {
 	    return carRepository.findByUser_Email(email).stream().map(MyCarResponse::from).toList();
 	}
+
 
 }

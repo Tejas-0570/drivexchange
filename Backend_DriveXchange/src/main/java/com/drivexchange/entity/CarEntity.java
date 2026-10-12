@@ -13,6 +13,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 @Entity
 @Table(name = "Car_Listings")
@@ -24,7 +26,12 @@ public class CarEntity {
 	private UUID id;
 	
 	// 1. The Core Identity (The absolute essentials)
-	@Column(name = "vin")
+	@Column(name = "vin", length = 17, nullable = false)
+	@NotBlank(message = "vin is required")
+	@Pattern(
+	        regexp = "^[A-HJ-NPR-Z0-9]{17}$", 
+	        message = "The VIN must be exactly 17 alphanumeric characters and cannot contain I, O, or Q"
+	    )
 	private String vin;
 	
 	@Column(name = "brand")
