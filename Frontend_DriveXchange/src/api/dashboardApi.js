@@ -10,6 +10,7 @@ export const ENDPOINTS = {
   profile: "/api/v1/users/me", // GET -> CurrentUserProfile, PUT -> UpdateUser
   myListings: "/api/v1/cars/my-listings", // GET -> cars owned by the logged-in user
   savedCars: null, // set to e.g. "/api/v1/users/me/favourites" once that API exists
+  listCar: "/api/v1/cars/list-car",
   changeEmail: "/api/v1/users/me/email", // PUT { newEmail, currentPassword }
   changePassword: "/api/v1/users/me/password", // PUT { currentPassword, newPassword }
 };
@@ -114,3 +115,6 @@ export const getMyListings = () => fetchCars(ENDPOINTS.myListings);
 // no favourites API yet -> empty list (shows the friendly empty state)
 export const getSavedCars = () =>
   ENDPOINTS.savedCars ? fetchCars(ENDPOINTS.savedCars) : Promise.resolve([]);
+
+export const createCar = (payload) =>
+  apiFetch(ENDPOINTS.listCar, { method: "POST", auth: true, body: payload });

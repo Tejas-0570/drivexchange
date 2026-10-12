@@ -248,7 +248,7 @@ export default function LandingPageDescription() {
           </ul>
  
           <Link
-            to="/sell"
+            to="/list-car"
             className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#161412] px-6 py-3.5 text-[15px] font-semibold text-white transition hover:bg-[#2a2622]"
           >
             Start Selling
