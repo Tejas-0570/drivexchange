@@ -6,6 +6,8 @@ import { formatMileage, formatPrice } from "./format";
 
 const STATUS = {
   ACTIVE: { label: "Active", tone: "green" },
+  AVAILABLE: { label: "Available", tone: "green" },
+  RESERVED: { label: "Reserved", tone: "amber" },
   PENDING: { label: "Under review", tone: "amber" },
   SOLD: { label: "Sold", tone: "gray" },
 };
@@ -50,8 +52,11 @@ export default function CarTile({ car, showStatus = false }) {
           </span>
         </div>
         <p className="mt-1.5 text-sm text-[#8c8c8c]">
-          {[car.year, car.location].filter(Boolean).join(" · ") || "—"}
+          {[car.year, car.color, car.location].filter(Boolean).join(" · ") || "—"}
         </p>
+        {car.headline && (
+          <p className="mt-1 truncate text-xs text-[#a8a59e]">{car.headline}</p>
+        )}
 
         {specs.length > 0 && (
           <p className="mt-3 truncate border-t border-[#eeeeee] pt-3 text-xs text-[#8a8a8a]">

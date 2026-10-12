@@ -8,8 +8,8 @@ import { ApiError, apiFetch } from "./api";
 /* ⚠️  CHANGE THESE to match your Spring controllers */
 export const ENDPOINTS = {
   profile: "/api/v1/users/me", // GET -> CurrentUserProfile, PUT -> UpdateUser
-  myListings: "/api/v1/cars/my", // GET -> cars created by the logged-in user
-  savedCars: "/api/v1/users/me/favourites", // GET -> cars the user saved
+  myListings: "/api/v1/cars/my-listings", // GET -> cars owned by the logged-in user
+  savedCars: null, // set to e.g. "/api/v1/users/me/favourites" once that API exists
   changeEmail: "/api/v1/users/me/email", // PUT { newEmail, currentPassword }
   changePassword: "/api/v1/users/me/password", // PUT { currentPassword, newPassword }
 };
@@ -31,7 +31,7 @@ export function normalizeProfile(raw = {}) {
     email: raw.email ?? "",
     mobile: raw.mobile ?? raw.mobileNo ?? raw.phone ?? "",
     roles: Array.isArray(roleSource) ? roleSource : [roleSource].filter(Boolean),
-    createdAt: raw.createdAt ?? raw.joinedAt ?? null,
+    createdAt: raw.createdAt ?? raw.created_at ?? raw.joinedAt ?? null,
   };
 }
 
@@ -64,26 +64,32 @@ export const changePassword = ({ currentPassword, newPassword }) =>
 
 /* ------------------------------------------------------------------ */
 /* cars                                                               */
+/* Accepts BOTH snake_case (car_id, fuel_type ...) and camelCase      */
+/* (carId, fuelType ...), matching your car_listings table & Postman. */
 /* ------------------------------------------------------------------ */
 export function normalizeCar(raw = {}) {
   const c = raw.car ?? raw; // favourites may wrap the car: { id, car: {...} }
-  const first = Array.isArray(c.images) ? c.images[0] : null;
+
+  const photoList = Array.isArray(c.photos) ? c.photos : Array.isArray(c.images) ? c.images : [];
+  const first = photoList[0];
+  const photo =
+    typeof first === "string" ? first : first?.url ?? first?.photo_url ?? first?.photoUrl ?? null;
+
+  const brandModel = [c.brand ?? c.make, c.model].filter(Boolean).join(" ");
 
   return {
-    id: c.id,
-    name:
-      c.name ??
-      c.title ??
-      ([c.make ?? c.brand, c.model].filter(Boolean).join(" ") || "Untitled listing"),
+    id: c.car_id ?? c.carId ?? c.id,
+    name: brandModel || c.title_header || c.titleHeader || c.name || "Untitled listing",
+    headline: c.title_header ?? c.titleHeader ?? "",
     price: Number(c.price ?? 0),
-    year: c.year ?? c.manufactureYear ?? null,
+    year: c.manufactured_year ?? c.manufacturedYear ?? c.year ?? null,
+    color: c.color ?? "",
     location: c.location ?? c.city ?? "",
     mileage: c.mileage ?? c.kmDriven ?? null,
-    fuelType: c.fuelType ?? c.fuel ?? "",
-    transmission: c.transmission ?? c.gear ?? "",
-    image:
-      c.image ?? c.imageUrl ?? (typeof first === "string" ? first : first?.url) ?? null,
-    status: String(c.status ?? "ACTIVE").toUpperCase(),
+    fuelType: c.fuel_type ?? c.fuelType ?? c.fuel ?? "",
+    transmission: c.transmission_type ?? c.transmissionType ?? c.transmission ?? "",
+    image: c.image ?? c.imageUrl ?? c.image_url ?? photo,
+    status: String(c.status ?? "AVAILABLE").toUpperCase(),
   };
 }
 
@@ -104,4 +110,7 @@ async function fetchCars(path) {
 }
 
 export const getMyListings = () => fetchCars(ENDPOINTS.myListings);
-export const getSavedCars = () => fetchCars(ENDPOINTS.savedCars);
+
+// no favourites API yet -> empty list (shows the friendly empty state)
+export const getSavedCars = () =>
+  ENDPOINTS.savedCars ? fetchCars(ENDPOINTS.savedCars) : Promise.resolve([]);
