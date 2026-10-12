@@ -51,8 +51,8 @@ public class CarEntity {
 	@Column(name = "mileage")
 	private int mileage;
 	
-	@Column(name = "status")
-	private String status;
+	@Column(name = "status", nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'Available'")
+	private String status = "Available";
 	
 	// 3. Technical & Mechanical Specifications
 	@Column(name = "fuel_type")
