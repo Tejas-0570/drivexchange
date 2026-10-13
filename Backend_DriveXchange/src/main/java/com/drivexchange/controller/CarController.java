@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.drivexchange.dto.ApiResponse;
+import com.drivexchange.dto.CarBrowseResponse;
 import com.drivexchange.dto.MyCarResponse;
 import com.drivexchange.entity.CarEntity;
 import com.drivexchange.entity.UserEntity;
@@ -50,6 +51,12 @@ public class CarController {
 	    // the email comes from the verified JWT, never from the request
 	    List<MyCarResponse> cars = carService.getCarsByOwnerEmail(authentication.getName());
 	    return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Listings fetched successfully", cars));
+	}
+	
+	@GetMapping("/browse-cars")
+	public ResponseEntity<ApiResponse<List<CarBrowseResponse>>> browseCar(){
+		List<CarBrowseResponse> cars = carService.getAllCars();
+		return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Fetched all cars", cars));
 	}
 
 }

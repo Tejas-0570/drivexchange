@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.drivexchange.dto.CarBrowseResponse;
 import com.drivexchange.dto.MyCarResponse;
 import com.drivexchange.entity.CarEntity;
 import com.drivexchange.exceptions.CarAlreadyExistsException;
@@ -31,6 +32,25 @@ public class CarDao implements CarService{
 	@Override
 	public List<MyCarResponse> getCarsByOwnerEmail(String email) {
 	    return carRepository.findByUser_Email(email).stream().map(MyCarResponse::from).toList();
+	}
+
+	@Override
+	public List<CarBrowseResponse> getAllCars() {
+		return carRepository.findAll().stream().map(car -> new CarBrowseResponse(
+				             car.getId(),
+				             car.getBrand(),
+				             car.getModel(),
+				             car.getPrice(),
+				             car.getStatus(),
+				             car.getManufactured_year(),
+				             car.getColor(),
+				             car.getMileage(),
+				             car.getFuel_type(),
+				             car.getTransmission_type(),
+				             car.getTitle_header(),
+				             car.getPhotUrls()
+				            
+				)).toList();
 	}
 
 
