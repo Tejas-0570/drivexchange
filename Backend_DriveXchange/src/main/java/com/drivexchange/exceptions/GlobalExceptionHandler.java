@@ -58,6 +58,13 @@ public class GlobalExceptionHandler {
     	ApiResponse<Void> response = ApiResponse.error(HttpStatus.CONFLICT.value(), "A car with this VIN is already listed");
     	return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
+    
+    // 5. Handle Resource not found Exception
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResourceNotFound(ResourceNotFoundException e){
+    	ApiResponse<Void> response = ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Resource not found");
+    	return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
 	
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception e){

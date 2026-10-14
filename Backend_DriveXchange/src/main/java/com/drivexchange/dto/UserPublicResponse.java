@@ -1,11 +1,11 @@
 package com.drivexchange.dto;
 
-import java.util.List;
+import java.util.Set;
 
 public record UserPublicResponse(
     String createdAt,
     String email,
     String mobile,
     String name,
-    List<String> role
+    Set<String> role
 ) {}

@@ -1,6 +1,7 @@
 package com.drivexchange.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.drivexchange.dto.ApiResponse;
 import com.drivexchange.dto.CarBrowseResponse;
+import com.drivexchange.dto.CarDetailResponse;
 import com.drivexchange.dto.MyCarResponse;
 import com.drivexchange.entity.CarEntity;
 import com.drivexchange.entity.UserEntity;
@@ -57,6 +60,14 @@ public class CarController {
 	public ResponseEntity<ApiResponse<List<CarBrowseResponse>>> browseCar(){
 		List<CarBrowseResponse> cars = carService.getAllCars();
 		return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Fetched all cars", cars));
+	}
+	
+	
+	@GetMapping("/{id}")
+	public ResponseEntity<ApiResponse<CarDetailResponse>> getCarFromID(@PathVariable  UUID id){
+		CarDetailResponse  response = carService.getCarFromId(id);
+		
+		return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Car Details Fetched", response));
 	}
 
 }
