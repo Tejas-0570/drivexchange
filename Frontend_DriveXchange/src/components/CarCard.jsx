@@ -85,6 +85,7 @@ export default function CarCard({
   onClick,
 }) {
   const [fav, setFav] = useState(isFavourite);
+  const [imgFailed, setImgFailed] = useState(false);
 
   const toggleFav = (e) => {
     e.stopPropagation();
@@ -98,16 +99,26 @@ export default function CarCard({
   return (
     <article
       onClick={onClick}
-      className="flex aspect-[414/385] w-full cursor-pointer flex-col overflow-hidden rounded-[22px] border border-[#efece6] bg-white font-['Manrope',system-ui,sans-serif] shadow-[0_2px_10px_rgba(30,25,15,0.06)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(30,25,15,0.1)]"
+      className="flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-[22px] border border-[#efece6] bg-white font-['Manrope',system-ui,sans-serif] shadow-[0_2px_10px_rgba(30,25,15,0.06)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(30,25,15,0.1)]"
     >
       {/* image area: change h-[60%] to h-[70%] for a taller image */}
-      <div className="group relative h-[60%] shrink-0 overflow-hidden bg-gradient-to-b from-[#f4f2ee] to-[#e4e6ea]">
-        <img
-          src={image}
-          alt={name}
-          loading="lazy"
-          className="block h-full w-full object-cover object-bottom transition-transform duration-500 ease-out group-hover:scale-[1.08]"
-        />
+      <div className="group relative aspect-[16/9] shrink-0 overflow-hidden bg-gradient-to-b from-[#f4f2ee] to-[#e4e6ea]">
+        {image && !imgFailed ? (
+          <img
+            src={image}
+            alt={name}
+            loading="lazy"
+            onError={() => setImgFailed(true)}
+            className="block h-full w-full object-cover object-bottom transition-transform duration-500 ease-out group-hover:scale-[1.08]"
+          />
+        ) : (
+          <div className="grid h-full w-full place-items-center text-[#b9b4a9]" aria-label="No photo yet">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M5 16l1.5-5A2 2 0 018.4 9.5h7.2a2 2 0 011.9 1.5L19 16M4 16h16v3h-2.5v-1.5h-11V19H4v-3z" />
+              <path d="M7.5 13h.01M16.5 13h.01" />
+            </svg>
+          </div>
+        )}
 
         {verified && (
           <span className="absolute left-3.5 top-3.5 z-10 inline-flex items-center gap-1.5 rounded-full bg-white py-2 pl-2.5 pr-3.5 text-[13px] font-semibold leading-none text-[#0f766e]">
@@ -132,19 +143,19 @@ export default function CarCard({
       {/* details */}
       <div className="flex flex-1 flex-col px-5 pb-4 pt-4">
         <div className="flex items-baseline justify-between gap-3">
-          <h3 className="m-0 text-xl font-semibold tracking-tight text-[#1c1c1e]">
+          <h3 title={name} className="m-0 min-w-0 truncate text-[17px] font-semibold tracking-tight text-[#1c1c1e]">
             {name}
           </h3>
-          <span className="whitespace-nowrap font-['Fraunces',Georgia,serif] text-[21px] font-bold text-[#1a6bff]">
+          <span className="shrink-0 whitespace-nowrap font-['Fraunces',Georgia,serif] text-[19px] font-bold text-[#1a6bff]">
             {formatPrice(price)}
           </span>
         </div>
 
-        <p className="mt-2.5 text-[15px] text-[#8c8c8c]">
-          {year} · {location}
+        <p className="mb-4 mt-2 text-sm text-[#8c8c8c]">
+          {[year, location].filter(Boolean).join(" · ")}
         </p>
 
-        <ul className="mt-auto flex items-center gap-[18px] border-t border-[#eeeeee] pt-3.5 text-[13px] text-[#8a8a8a]">
+        <ul className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-[#eeeeee] pt-3 text-xs text-[#8a8a8a]">
           <li className="inline-flex items-center gap-1.5">
             <span className="text-[#7a7a7a]">
               <GaugeIcon />

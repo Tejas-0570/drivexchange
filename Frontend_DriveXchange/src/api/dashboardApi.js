@@ -10,7 +10,7 @@ export const ENDPOINTS = {
   profile: "/api/v1/users/me", // GET -> CurrentUserProfile, PUT -> UpdateUser
   myListings: "/api/v1/cars/my-listings", // GET -> cars owned by the logged-in user
   savedCars: null, // set to e.g. "/api/v1/users/me/favourites" once that API exists
-  listCar: "/api/v1/cars/list-car",
+  listCar: "/api/v1/cars/list-car", // POST -> create a new listing (your working Postman URL)
   changeEmail: "/api/v1/users/me/email", // PUT { newEmail, currentPassword }
   changePassword: "/api/v1/users/me/password", // PUT { currentPassword, newPassword }
 };
@@ -71,7 +71,8 @@ export const changePassword = ({ currentPassword, newPassword }) =>
 export function normalizeCar(raw = {}) {
   const c = raw.car ?? raw; // favourites may wrap the car: { id, car: {...} }
 
-  const photoList = Array.isArray(c.photos) ? c.photos : Array.isArray(c.images) ? c.images : [];
+  // browse API currently names it "photUrls" (typo) — accept both spellings
+  const photoList = [c.photUrls, c.photoUrls, c.photos, c.images].find(Array.isArray) ?? [];
   const first = photoList[0];
   const photo =
     typeof first === "string" ? first : first?.url ?? first?.photo_url ?? first?.photoUrl ?? null;
@@ -91,6 +92,7 @@ export function normalizeCar(raw = {}) {
     transmission: c.transmission_type ?? c.transmissionType ?? c.transmission ?? "",
     image: c.image ?? c.imageUrl ?? c.image_url ?? photo,
     status: String(c.status ?? "AVAILABLE").toUpperCase(),
+    verified: Boolean(c.verified ?? c.isVerified), // badge only shows if the backend says so
   };
 }
 
@@ -116,5 +118,6 @@ export const getMyListings = () => fetchCars(ENDPOINTS.myListings);
 export const getSavedCars = () =>
   ENDPOINTS.savedCars ? fetchCars(ENDPOINTS.savedCars) : Promise.resolve([]);
 
+// payload keys are snake_case, exactly like your Postman request
 export const createCar = (payload) =>
   apiFetch(ENDPOINTS.listCar, { method: "POST", auth: true, body: payload });

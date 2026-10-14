@@ -36,7 +36,7 @@ export class ApiError extends Error {
 /* ---------------- fetch helper ----------------
    apiFetch("/api/v1/users/me", { auth: true })   -> adds Authorization header
    apiFetch("/api/v1/auth/login", { method: "POST", body: {...} })        */
-export async function apiFetch(path, { method = "GET", body, auth = false } = {}) {
+export async function apiFetch(path, { method = "GET", body, auth = false, signal } = {}) {
   const headers = { "Content-Type": "application/json" };
 
   if (auth) {
@@ -50,8 +50,10 @@ export async function apiFetch(path, { method = "GET", body, auth = false } = {}
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
+      signal, // lets callers cancel a request that is no longer needed
     });
-  } catch {
+  } catch (err) {
+    if (err?.name === "AbortError") throw err; // cancelled on purpose, not a failure
     throw new ApiError("Cannot reach the server. Please try again.", 0);
   }
 

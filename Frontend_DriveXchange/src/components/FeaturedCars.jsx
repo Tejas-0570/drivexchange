@@ -67,13 +67,13 @@ export default function FeaturedCars() {
       <div className="mx-auto max-w-[1144px]">
         {/* heading row */}
         <div className="mb-10 flex items-end justify-between gap-4">
-          <h2 className="font-['Fraunces',Georgia,serif] text-xl font-bold tracking-tight text-[#1c1c1e] sm:text-4xl">
+          <h2 className="font-['Fraunces',Georgia,serif] text-3xl font-bold tracking-tight text-[#1c1c1e] sm:text-4xl">
             Featured Vehicles
           </h2>
 
           <Link
             to="/browse-cars"
-            className="group inline-flex shrink-0 items-center gap-2 pb-1 text-sm font-medium text-[#1a6bff] transition-colors hover:text-[#0f5ae6]"
+            className="group inline-flex shrink-0 items-center gap-2 pb-1 text-base font-medium text-[#1a6bff] transition-colors hover:text-[#0f5ae6]"
           >
             View all listings
             <ArrowRight />
@@ -83,7 +83,7 @@ export default function FeaturedCars() {
         {/* cards */}
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {cars.map((car) => (
-            <div key={car.id} className="mx-auto w-full max-w-[360px]">
+            <div key={car.id} className="mx-auto h-full w-full max-w-[360px]">
               <CarCard
                 {...car}
                 onFavouriteChange={(isFav) =>
