@@ -53,6 +53,8 @@ public class UserDao implements UserService{
 				u.getId(),
 				u.getName(),
 				u.getEmail(),
+				u.getMobile(),
+				u.getCreatedAt(),
 				u.getRole()
 		);
 	}
