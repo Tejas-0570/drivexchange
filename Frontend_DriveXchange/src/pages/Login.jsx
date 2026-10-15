@@ -16,7 +16,8 @@ const Login = () => {
   const location = useLocation();
 
   // ProtectedRoute stores where the user was heading; default is home
-  const redirectTo = location.state?.from?.pathname ?? "/";
+  const from = location.state?.from;
+  const redirectTo = from ? `${from.pathname}${from.search ?? ""}` : "/";
 
   // coming from Signup: show a success message and pre-fill the email
   const notice =

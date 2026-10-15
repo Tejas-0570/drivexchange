@@ -94,3 +94,38 @@ export async function fetchBrowseCars(params, signal) {
 
   return { items: content.map(normalizeCar), total, hasMore };
 }
+
+/* ------------------------------------------------------------------ */
+/* single car (details page)                                          */
+/* ------------------------------------------------------------------ */
+export function normalizeCarDetails(raw = {}) {
+  const base = normalizeCar(raw);
+
+  const photoList = [raw.photoUrls, raw.photUrls, raw.photos, raw.images].find(Array.isArray) ?? [];
+  const images = photoList
+    .map((p) => (typeof p === "string" ? p : p?.url ?? p?.photo_url ?? p?.photoUrl))
+    .filter(Boolean);
+
+  const owner = raw.owner ?? raw.seller ?? {};
+
+  return {
+    ...base,
+    brand: raw.brand ?? raw.make ?? "",
+    model: raw.model ?? "",
+    images,
+    description: raw.description ?? "",
+    vin: raw.vin ?? "",
+    seller: {
+      name: owner.name ?? "",
+      email: owner.email ?? "",
+      mobile: owner.mobile ?? owner.phone ?? "",
+      memberSince: owner.createdAt ?? owner.created_at ?? null,
+    },
+  };
+}
+
+// GET /api/v1/cars/{id}
+export async function getCarById(id, signal) {
+  const body = await apiFetch(`/api/v1/cars/${encodeURIComponent(id)}`, { auth: true, signal });
+  return normalizeCarDetails(unwrap(body));
+}

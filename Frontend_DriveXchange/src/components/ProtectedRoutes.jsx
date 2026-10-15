@@ -9,7 +9,13 @@ export default function ProtectedRoute({ children }) {
 
   if (!isLoggedIn) {
     // remember where they wanted to go, so login can send them back
-    return <Navigate to="/login" replace state={{ from: location }} />;
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ from: location, notice: "Please log in to continue." }}
+      />
+    );
   }
 
   return children;

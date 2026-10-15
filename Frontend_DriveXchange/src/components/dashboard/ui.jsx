@@ -104,8 +104,9 @@ export const Icons = {
 };
 
 /* ---------------------------- layout bits ---------------------------- */
-export const Card = ({ className = "", children }) => (
+export const Card = ({ className = "", children, ...rest }) => (
   <div
+    {...rest}
     className={`rounded-2xl border border-[#efece6] bg-white shadow-[0_2px_10px_rgba(30,25,15,0.05)] ${className}`}
   >
     {children}
