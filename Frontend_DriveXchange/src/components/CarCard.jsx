@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 /* ---------- small inline icons (no extra dependency) ---------- */
 const Icon = ({ children, size = 14 }) => (
@@ -86,6 +86,12 @@ export default function CarCard({
 }) {
   const [fav, setFav] = useState(isFavourite);
   const [imgFailed, setImgFailed] = useState(false);
+
+  // follow the parent: the saved list may finish loading after the card appears,
+  // and a failed save puts the heart back
+  useEffect(() => {
+    setFav(isFavourite);
+  }, [isFavourite]);
 
   const toggleFav = (e) => {
     e.stopPropagation();

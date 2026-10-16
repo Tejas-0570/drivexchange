@@ -9,7 +9,7 @@ import { ApiError, apiFetch } from "./api";
 export const ENDPOINTS = {
   profile: "/api/v1/users/me", // GET -> CurrentUserProfile, PUT -> UpdateUser
   myListings: "/api/v1/cars/my-listings", // GET -> cars owned by the logged-in user
-  savedCars: null, // set to e.g. "/api/v1/users/me/favourites" once that API exists
+  savedCars: "/api/v1/favourites", // GET = my saved cars, GET /ids, PUT|DELETE /{carId}
   listCar: "/api/v1/cars/list-car", // POST -> create a new listing (your working Postman URL)
   changeEmail: "/api/v1/users/me/email", // PUT { newEmail, currentPassword }
   changePassword: "/api/v1/users/me/password", // PUT { currentPassword, newPassword }
@@ -121,3 +121,23 @@ export const getSavedCars = () =>
 // payload keys are snake_case, exactly like your Postman request
 export const createCar = (payload) =>
   apiFetch(ENDPOINTS.listCar, { method: "POST", auth: true, body: payload });
+
+/* ------------------------------------------------------------------ */
+/* favourites (saved cars)                                            */
+/* ------------------------------------------------------------------ */
+// ids of every car the logged-in user has saved
+export async function getFavouriteIds() {
+  try {
+    const data = unwrap(await apiFetch(`${ENDPOINTS.savedCars}/ids`, { auth: true }));
+    return Array.isArray(data) ? data.map(String) : [];
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return []; // API not built yet
+    throw err;
+  }
+}
+
+export const addFavourite = (carId) =>
+  apiFetch(`${ENDPOINTS.savedCars}/${encodeURIComponent(carId)}`, { method: "PUT", auth: true });
+
+export const removeFavourite = (carId) =>
+  apiFetch(`${ENDPOINTS.savedCars}/${encodeURIComponent(carId)}`, { method: "DELETE", auth: true });

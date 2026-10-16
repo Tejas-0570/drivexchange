@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CarCard from "../CarCard";
 import { fetchBrowseCars } from "../../api/carApi";
+import { useFavouriteActions } from "../../context/FavouritesContext";
 
 export default function SimilarCars({ car }) {
   const navigate = useNavigate();
+  const { isFavourite, toggle: toggleFavourite } = useFavouriteActions();
   const [cars, setCars] = useState([]);
 
   useEffect(() => {
@@ -40,6 +42,8 @@ export default function SimilarCars({ car }) {
               fuelType={c.fuelType}
               transmission={c.transmission}
               verified={c.verified}
+              isFavourite={isFavourite(c.id)}
+              onFavouriteChange={(next) => toggleFavourite(c.id, next)}
               onClick={() => navigate(`/cars/${c.id}`)}
             />
           </div>

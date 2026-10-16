@@ -43,5 +43,11 @@ export default function useDashboardData() {
     load();
   }, [load]);
 
-  return { ...state, reload: load };
+  // drop a car from the saved list instantly (after the user un-saves it)
+  const removeSaved = useCallback(
+    (id) => setState((s) => ({ ...s, saved: s.saved.filter((c) => String(c.id) !== String(id)) })),
+    []
+  );
+
+  return { ...state, reload: load, removeSaved };
 }

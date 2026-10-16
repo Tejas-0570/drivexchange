@@ -8,6 +8,7 @@ import FiltersPanel from "../components/browse/FiltersPanel";
 import CardSkeleton from "../components/browse/CardSkeleton";
 import { EmptyState, ErrorBanner, Icons } from "../components/dashboard/ui";
 import useCarSearch from "../hooks/useCarSearch";
+import { useFavouriteActions } from "../context/FavouritesContext";
 import { useDebouncedField } from "../hooks/useDebouncedField";
 import {
   activeFilterCount,
@@ -38,6 +39,7 @@ function InfiniteSentinel({ onVisible, disabled }) {
 
 const BrowseCars = () => {
   const navigate = useNavigate();
+  const { isFavourite, toggle: toggleFavourite } = useFavouriteActions();
   const [params, setParams] = useSearchParams();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -209,6 +211,8 @@ const BrowseCars = () => {
                         fuelType={car.fuelType}
                         transmission={car.transmission}
                         verified={car.verified}
+                        isFavourite={isFavourite(car.id)}
+                        onFavouriteChange={(next) => toggleFavourite(car.id, next)}
                         onClick={() => navigate(`/cars/${car.id}`)}
                       />
                     </div>
