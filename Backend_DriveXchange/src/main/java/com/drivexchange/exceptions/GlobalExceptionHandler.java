@@ -65,6 +65,20 @@ public class GlobalExceptionHandler {
     	ApiResponse<Void> response = ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Resource not found");
     	return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
+    
+    // 6. Handle User not found exception
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUserNotFound(UserNotFoundException e){
+    	ApiResponse<Void> response = ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "User Not Found");
+    	return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+    
+    // 7. Handle Car not found exception
+    @ExceptionHandler(CarNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCarNotFound(CarNotFoundException e){
+    	ApiResponse<Void> response = ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Car not found");
+    	return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
 	
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception e){
