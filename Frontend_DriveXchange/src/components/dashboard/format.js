@@ -1,7 +1,8 @@
 // src/components/dashboard/format.js
 
-export const formatPrice = (value, currency = "USD") =>
-  new Intl.NumberFormat("en-US", {
+// Indian rupees with lakh/crore grouping, e.g. ₹6,89,000
+export const formatPrice = (value, currency = "INR") =>
+  new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency,
     maximumFractionDigits: 0,

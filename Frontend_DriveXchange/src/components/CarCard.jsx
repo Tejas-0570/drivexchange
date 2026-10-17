@@ -59,12 +59,12 @@ const GearIcon = () => (
 );
 
 /* ---------- helpers ---------- */
-const formatPrice = (value, currency = "USD") =>
-  new Intl.NumberFormat("en-US", {
+const formatPrice = (value, currency = "INR") =>
+  new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency,
     maximumFractionDigits: 0,
-  }).format(value);
+  }).format(Number(value) || 0);
 
 const formatMileage = (miles) =>
   `${new Intl.NumberFormat("en-US").format(miles)} mi`;

@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import useCarDetails from "../hooks/useCarDetails";
 import { useFavouriteActions } from "../context/FavouritesContext";
 import Gallery from "../components/details/Gallery";
-import SellerCard from "../components/details/SellerCard";
+import ReserveCard from "../components/details/ReserveCard";
 import SimilarCars from "../components/details/SimilarCars";
 import { Description, KeySpecs, SafetyTips, SpecTable } from "../components/details/CarInfo";
 import { EmptyState, ErrorBanner, Icons, Pill, Skeleton } from "../components/dashboard/ui";
@@ -38,7 +38,7 @@ export default function CarDetails() {
   const { id } = useParams();
   const location = useLocation();
   const { isFavourite, toggle: toggleFavourite } = useFavouriteActions();
-  const { user, isLoggedIn, logout } = useAuth();
+  const { isLoggedIn, logout } = useAuth();
   const { car, loading, error, notFound, unauthorized, retry } = useCarDetails(id);
   const [shareNote, setShareNote] = useState("");
 
@@ -55,9 +55,8 @@ export default function CarDetails() {
     return () => { document.title = previous; };
   }, [car]);
 
-  const isOwner =
-    Boolean(user?.email) && Boolean(car?.seller.email) &&
-    user.email.toLowerCase() === car.seller.email.toLowerCase();
+  // decided by the server (from the JWT) — the page never needs the seller's email
+  const isOwner = Boolean(car?.isOwner);
 
   const share = async () => {
     const url = window.location.href;
@@ -78,8 +77,8 @@ export default function CarDetails() {
     setTimeout(() => setShareNote(""), 2200);
   };
 
-  const scrollToContact = () =>
-    document.getElementById("contact-card")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  const scrollToReserve = () =>
+    document.getElementById("reserve-card")?.scrollIntoView({ behavior: "smooth", block: "center" });
 
   // the server rejected our token (expired / invalid) -> clear it
   useEffect(() => {
@@ -196,7 +195,7 @@ export default function CarDetails() {
 
               {/* ---------------- right (sticky) ---------------- */}
               <aside className="lg:sticky lg:top-[124px]">
-                <SellerCard car={car} isOwner={isOwner} isLoggedIn={isLoggedIn} />
+                <ReserveCard car={car} isOwner={isOwner} isLoggedIn={isLoggedIn} />
               </aside>
             </div>
 
@@ -216,8 +215,8 @@ export default function CarDetails() {
               <p className="text-[11px] uppercase tracking-wider text-[#a8a59e]">Asking price</p>
               <p className="font-['Fraunces',Georgia,serif] text-xl font-bold text-[#1a6bff]">{formatPrice(car.price)}</p>
             </div>
-            <button type="button" onClick={scrollToContact} className="rounded-xl bg-[#1a6bff] px-6 py-3 text-[15px] font-semibold text-white shadow-[0_8px_20px_rgba(26,107,255,0.3)]">
-              Contact seller
+            <button type="button" onClick={scrollToReserve} className="rounded-xl bg-[#1a6bff] px-6 py-3 text-[15px] font-semibold text-white shadow-[0_8px_20px_rgba(26,107,255,0.3)]">
+              Reserve this car
             </button>
           </div>
         </>

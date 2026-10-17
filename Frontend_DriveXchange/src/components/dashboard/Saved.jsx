@@ -1,11 +1,20 @@
 // src/components/dashboard/SavedTab.jsx
 import { Link } from "react-router-dom";
 import CarTile from "./CarTile";
+import { useFavourites } from "../../context/FavouritesContext";
 import { TileSkeletons } from "./Listings";
 import { EmptyState, ErrorBanner, SectionHeader } from "./ui";
 
 export default function SavedTab({ data }) {
-  const { saved, loading, errors, reload } = data;
+  const { saved, loading, errors, reload, removeSaved } = data;
+  const { setFavourite } = useFavourites();
+
+  // heart on a saved tile: hide it at once, tell the server, undo (reload) if that fails
+  const handleRemove = async (id) => {
+    removeSaved(id);
+    const ok = await setFavourite(id, false);
+    if (!ok) reload();
+  };
 
   return (
     <div>
@@ -36,7 +45,7 @@ export default function SavedTab({ data }) {
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {saved.map((car) => (
-            <CarTile key={car.id} car={car} />
+            <CarTile key={car.id} car={car} showStatus onRemove={handleRemove} />
           ))}
         </div>
       )}

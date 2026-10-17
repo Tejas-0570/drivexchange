@@ -1,12 +1,16 @@
 // src/components/listcar/Steps.jsx
 // The four screens of the wizard + the small form controls they use.
+import { useRef, useState } from "react";
 import { Field } from "../AuthLayout";
 import { Icons } from "../dashboard/ui";
 import { formatMileage, formatPrice } from "../dashboard/format";
 import {
+  acceptPhotos,
   BRANDS,
   COLORS,
   FUEL_TYPES,
+  MAX_PHOTO_MB,
+  MAX_PHOTOS,
   suggestTitle,
   TRANSMISSIONS,
   YEARS,
@@ -144,7 +148,7 @@ function ChoiceCards({ legend, options, value, onChange, error, cols = "grid-col
 /* ------------------------------------------------------------------ */
 /* STEP 1 — Vehicle                                                   */
 /* ------------------------------------------------------------------ */
-export function StepVehicle({ values, errors, onChange }) {
+export function StepVehicle({ values, errors, onChange, editing = false }) {
   return (
     <div className="space-y-5">
       <div className="grid gap-5 sm:grid-cols-2">
@@ -231,10 +235,21 @@ export function StepVehicle({ values, errors, onChange }) {
           maxLength={17}
           autoComplete="off"
           spellCheck={false}
-          right={<span className="text-xs tabular-nums text-[#a8a59e]">{values.vin.length}/17</span>}
+          readOnly={editing}
+          right={
+            editing ? (
+              <span className="text-xs font-semibold text-[#a8a59e]">Locked</span>
+            ) : (
+              <span className="text-xs tabular-nums text-[#a8a59e]">{values.vin.length}/17</span>
+            )
+          }
         />
         {!errors.vin && (
-          <p className="mt-1.5 text-xs text-[#a8a59e]">Found on the dashboard near the windshield or on the registration papers.</p>
+          <p className="mt-1.5 text-xs text-[#a8a59e]">
+            {editing
+              ? "The VIN identifies the car, so it can't be changed. If it's wrong, remove this listing and list the car again."
+              : "Found on the dashboard near the windshield or on the registration papers."}
+          </p>
         )}
       </div>
     </div>
@@ -282,7 +297,128 @@ export function StepSpecs({ values, errors, onChange }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* STEP 3 — Pricing & description                                     */
+/* STEP 3 — Photos (optional)                                         */
+/* ------------------------------------------------------------------ */
+export function StepPhotos({ values, onChange }) {
+  const inputRef = useRef(null);
+  const [dragging, setDragging] = useState(false);
+  const [notes, setNotes] = useState([]);
+  const photos = values.photos;
+  const full = photos.length >= MAX_PHOTOS;
+
+  const addFiles = (files) => {
+    if (!files || files.length === 0) return;
+    const { added, rejected } = acceptPhotos(files, photos);
+    setNotes(rejected);
+    if (added.length) onChange("photos", [...photos, ...added]);
+  };
+
+  const remove = (id) => {
+    const gone = photos.find((p) => p.id === id);
+    if (gone) URL.revokeObjectURL(gone.url);
+    setNotes([]);
+    onChange("photos", photos.filter((p) => p.id !== id));
+  };
+
+  const makeCover = (id) => {
+    const pick = photos.find((p) => p.id === id);
+    onChange("photos", [pick, ...photos.filter((p) => p.id !== id)]);
+  };
+
+  return (
+    <div className="space-y-5">
+      <label
+        onDragOver={(e) => { e.preventDefault(); if (!full) setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => { e.preventDefault(); setDragging(false); if (!full) addFiles(e.dataTransfer.files); }}
+        className={`flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed px-6 py-10 text-center transition focus-within:border-[#1a6bff] focus-within:shadow-[0_0_0_4px_rgba(26,107,255,0.12)] ${
+          full
+            ? "cursor-not-allowed border-[#e6e2da] bg-[#faf8f4] opacity-70"
+            : dragging
+            ? "border-[#1a6bff] bg-[#f2f7ff]"
+            : "border-[#d9d5cc] bg-white hover:border-[#1a6bff] hover:bg-[#f9fbff]"
+        }`}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          multiple
+          disabled={full}
+          className="sr-only"
+          onChange={(e) => {
+            addFiles(e.target.files);
+            e.target.value = ""; // lets the user pick the same file again after removing it
+          }}
+        />
+        <span className="grid h-14 w-14 place-items-center rounded-2xl bg-[#e8f0ff] text-[#1a6bff]">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="16" rx="3" />
+            <circle cx="9" cy="10" r="1.8" />
+            <path d="M21 16l-5-5-8 9" />
+          </svg>
+        </span>
+        <span className="mt-4 text-[15px] font-semibold text-[#1c1c1e]">
+          {full ? "You've added the maximum number of photos" : "Drag photos here, or click to browse"}
+        </span>
+        <span className="mt-1.5 text-xs text-[#8c8c8c]">
+          JPG, PNG or WebP · up to {MAX_PHOTO_MB} MB each · max {MAX_PHOTOS} photos
+        </span>
+      </label>
+
+      {notes.length > 0 && (
+        <ul role="alert" className="space-y-1 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-600">
+          {notes.map((n) => (<li key={n}>{n}</li>))}
+        </ul>
+      )}
+
+      {photos.length > 0 && (
+        <div>
+          <div className="mb-3 flex items-center justify-between text-xs text-[#8c8c8c]">
+            <span className="font-semibold text-[#1c1c1e]">{photos.length} of {MAX_PHOTOS} photos</span>
+            <span>The first photo is the cover.</span>
+          </div>
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+            {photos.map((p, i) => (
+              <li key={p.id} className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-[#efece6] bg-[#f4f2ee]">
+                <img src={p.url} alt={`Car photo ${i + 1}`} className="h-full w-full object-cover" />
+                {i === 0 && (
+                  <span className="absolute left-2 top-2 rounded-full bg-[#1a6bff] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+                    Cover
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => remove(p.id)}
+                  aria-label={`Remove photo ${i + 1}`}
+                  className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-white/95 text-[#1c1c1e] shadow transition hover:bg-red-50 hover:text-red-600"
+                >
+                  <Icons.close width={14} height={14} />
+                </button>
+                {i !== 0 && (
+                  <button
+                    type="button"
+                    onClick={() => makeCover(p.id)}
+                    className="absolute inset-x-2 bottom-2 rounded-lg bg-white/95 py-1.5 text-[11px] font-semibold text-[#1c1c1e] opacity-0 shadow transition hover:text-[#1a6bff] focus:opacity-100 group-hover:opacity-100"
+                  >
+                    Make cover
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <p className="text-xs text-[#a8a59e]">
+        You can skip this step. Bright, daylight shots of the front, back, sides and interior work best.
+      </p>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* STEP 4 — Pricing & description                                     */
 /* ------------------------------------------------------------------ */
 export function StepPricing({ values, errors, onChange }) {
   const suggestion = suggestTitle(values);
@@ -291,12 +427,12 @@ export function StepPricing({ values, errors, onChange }) {
     <div className="space-y-5">
       <Field
         id="price"
-        label="Asking price (USD)"
+        label="Asking price (₹)"
         inputMode="numeric"
-        placeholder="e.g. 36500"
-        icon={<span className="text-base font-semibold leading-none">$</span>}
+        placeholder="e.g. 850000"
+        icon={<span className="text-base font-semibold leading-none">₹</span>}
         value={values.price}
-        onChange={(e) => onChange("price", e.target.value.replace(/\D/g, "").slice(0, 8))}
+        onChange={(e) => onChange("price", e.target.value.replace(/\D/g, "").slice(0, 9))}
         error={errors.price}
         autoComplete="off"
         autoFocus
@@ -348,7 +484,7 @@ export function StepPricing({ values, errors, onChange }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* STEP 4 — Review                                                    */
+/* STEP 5 — Review                                                    */
 /* ------------------------------------------------------------------ */
 const ReviewRow = ({ label, children }) => (
   <div className="flex items-start justify-between gap-6 border-b border-[#f1eee8] py-3 text-sm last:border-0">
@@ -369,23 +505,40 @@ const ReviewSection = ({ title, onEdit, children }) => (
   </section>
 );
 
-export function StepReview({ values, errors, onChange, onEdit }) {
+export function StepReview({ values, errors, onChange, onEdit, steps, editing = false }) {
+  // jump to a step by its id (the list changes in edit mode)
+  const edit = (id) => () => onEdit(steps.findIndex((s) => s.id === id));
+
   return (
     <div className="space-y-4">
-      <ReviewSection title="Vehicle" onEdit={() => onEdit(0)}>
+      <ReviewSection title="Vehicle" onEdit={edit("vehicle")}>
         <ReviewRow label="Car">{values.brand} {values.model}</ReviewRow>
         <ReviewRow label="Year">{values.year}</ReviewRow>
         <ReviewRow label="Colour">{values.color}</ReviewRow>
         <ReviewRow label="VIN"><span className="font-mono text-[13px]">{values.vin.toUpperCase()}</span></ReviewRow>
       </ReviewSection>
 
-      <ReviewSection title="Specs" onEdit={() => onEdit(1)}>
+      <ReviewSection title="Specs" onEdit={edit("specs")}>
         <ReviewRow label="Distance driven">{formatMileage(values.mileage)}</ReviewRow>
         <ReviewRow label="Fuel type">{values.fuelType}</ReviewRow>
         <ReviewRow label="Transmission">{values.transmission}</ReviewRow>
       </ReviewSection>
 
-      <ReviewSection title="Pricing" onEdit={() => onEdit(2)}>
+      {!editing && (
+        <ReviewSection title="Photos" onEdit={edit("photos")}>
+          {values.photos.length === 0 ? (
+            <p className="py-3 text-sm text-[#8c8c8c]">No photos added. You can still publish without them.</p>
+          ) : (
+            <div className="flex gap-2 overflow-x-auto py-3">
+              {values.photos.map((p, i) => (
+                <img key={p.id} src={p.url} alt={`Car photo ${i + 1}`} className="h-16 w-24 shrink-0 rounded-lg border border-[#efece6] object-cover" />
+              ))}
+            </div>
+          )}
+        </ReviewSection>
+      )}
+
+      <ReviewSection title="Pricing" onEdit={edit("pricing")}>
         <ReviewRow label="Asking price">
           <span className="font-['Fraunces',Georgia,serif] text-base font-bold text-[#1a6bff]">{formatPrice(values.price)}</span>
         </ReviewRow>
@@ -397,21 +550,27 @@ export function StepReview({ values, errors, onChange, onEdit }) {
 
       <div className="flex items-start gap-3 rounded-xl bg-[#e3f1ef] px-4 py-3 text-sm text-[#0f766e]">
         <Icons.shield width={18} height={18} className="mt-0.5 shrink-0" />
-        <span>Your car will go live as <strong>Available</strong> and appear in My Listings straight away.</span>
+        <span>
+          {editing
+            ? "Saving will update your live listing straight away."
+            : <>Your car will go live as <strong>Available</strong> and appear in My Listings straight away.</>}
+        </span>
       </div>
 
-      <div>
-        <label className="flex cursor-pointer items-start gap-2.5 text-sm text-[#5f5f5f]">
-          <input
-            type="checkbox"
-            checked={values.confirm}
-            onChange={(e) => onChange("confirm", e.target.checked)}
-            className="mt-0.5 h-4 w-4 shrink-0 rounded accent-[#1a6bff]"
-          />
-          <span>I confirm that the details above are accurate and that I'm the owner or authorised to sell this car.</span>
-        </label>
-        <ErrorText>{errors.confirm}</ErrorText>
-      </div>
+      {!editing && (
+        <div>
+          <label className="flex cursor-pointer items-start gap-2.5 text-sm text-[#5f5f5f]">
+            <input
+              type="checkbox"
+              checked={values.confirm}
+              onChange={(e) => onChange("confirm", e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded accent-[#1a6bff]"
+            />
+            <span>I confirm that the details above are accurate and that I'm the owner or authorised to sell this car.</span>
+          </label>
+          <ErrorText>{errors.confirm}</ErrorText>
+        </div>
+      )}
     </div>
   );
 }

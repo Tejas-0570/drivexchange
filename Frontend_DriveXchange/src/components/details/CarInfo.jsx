@@ -117,7 +117,8 @@ const TIPS = [
   "Inspect the car in person and take a test drive before paying anything.",
   "Check that the VIN on the car matches the VIN in this listing and the papers.",
   "Verify the registration and ownership documents before you agree on a price.",
-  "Never send money in advance to someone you haven't met.",
+  "Pay only through Drivexchange. Never send money to a seller directly.",
+  "Never share OTPs, card details or bank passwords with anyone.",
 ];
 
 export function SafetyTips() {

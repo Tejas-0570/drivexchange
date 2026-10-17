@@ -49,5 +49,16 @@ export default function useDashboardData() {
     []
   );
 
-  return { ...state, reload: load, removeSaved };
+  // drop a listing from My Listings instantly (after the owner deleted it)
+  const removeListing = useCallback(
+    (id) =>
+      setState((s) => ({
+        ...s,
+        listings: s.listings.filter((c) => String(c.id) !== String(id)),
+        saved: s.saved.filter((c) => String(c.id) !== String(id)),
+      })),
+    []
+  );
+
+  return { ...state, reload: load, removeSaved, removeListing };
 }

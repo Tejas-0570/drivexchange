@@ -40,7 +40,7 @@ const digits = (v) => v.replace(/\D/g, "").slice(0, 8);
 function PriceInput({ placeholder, value, onChange, label }) {
   return (
     <label className="flex flex-1 items-center gap-2 rounded-xl border border-[#e6e2da] bg-white px-3 transition focus-within:border-[#1a6bff] focus-within:shadow-[0_0_0_4px_rgba(26,107,255,0.12)]">
-      <span className="text-sm text-[#9a9a9a]">$</span>
+      <span className="text-sm text-[#9a9a9a]">₹</span>
       <input
         aria-label={label}
         inputMode="numeric"
@@ -91,7 +91,7 @@ export default function FiltersPanel({ filters, onChange, onClear, activeCount }
         </div>
       </Section>
 
-      <Section title="Price (USD)">
+      <Section title="Price (₹)">
         <div className="flex items-center gap-2">
           <PriceInput label="Minimum price" placeholder="Min" value={minPrice} onChange={setMinPrice} />
           <span className="text-[#b3b0a9]">–</span>

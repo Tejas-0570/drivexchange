@@ -190,7 +190,7 @@ export default function Dashboard() {
               <div key={tab} className="dash-fade">
                 {tab === "overview" && <OverviewTab data={data} onNavigate={go} />}
                 {tab === "profile" && <ProfileTab onNavigate={go} notify={notify} />}
-                {tab === "listings" && <ListingsTab data={data} />}
+                {tab === "listings" && <ListingsTab data={data} notify={notify} />}
                 {tab === "saved" && <SavedTab data={data} />}
                 {tab === "security" && <SecurityTab notify={notify} />}
               </div>

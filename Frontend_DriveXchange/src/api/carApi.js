@@ -106,7 +106,11 @@ export function normalizeCarDetails(raw = {}) {
     .map((p) => (typeof p === "string" ? p : p?.url ?? p?.photo_url ?? p?.photoUrl))
     .filter(Boolean);
 
-  const owner = raw.owner ?? raw.seller ?? {};
+  // Privacy: only a first name and "member since" are ever kept. Even if the
+  // backend still sends email / mobile, they are NOT copied into the UI state.
+  const owner = raw.seller ?? raw.owner ?? {};
+  const firstName =
+    owner.firstName ?? owner.first_name ?? String(owner.name ?? "").trim().split(/\s+/)[0] ?? "";
 
   return {
     ...base,
@@ -115,11 +119,11 @@ export function normalizeCarDetails(raw = {}) {
     images,
     description: raw.description ?? "",
     vin: raw.vin ?? "",
+    // decided by the server from the JWT: "is the logged-in user the owner?"
+    isOwner: Boolean(raw.isOwner ?? raw.is_owner ?? raw.mine),
     seller: {
-      name: owner.name ?? "",
-      email: owner.email ?? "",
-      mobile: owner.mobile ?? owner.phone ?? "",
-      memberSince: owner.createdAt ?? owner.created_at ?? null,
+      firstName,
+      memberSince: owner.memberSince ?? owner.member_since ?? owner.createdAt ?? owner.created_at ?? null,
     },
   };
 }

@@ -16,6 +16,12 @@ export const STEPS = [
     subtitle: "How the car drives and how much it has been used.",
   },
   {
+    id: "photos",
+    label: "Photos",
+    title: "Add photos",
+    subtitle: "Optional — listings with photos get far more enquiries.",
+  },
+  {
     id: "pricing",
     label: "Pricing",
     title: "Price & description",
@@ -29,6 +35,15 @@ export const STEPS = [
   },
 ];
 
+// While editing, the photos step is skipped until the server can store / delete photos.
+export const stepsFor = (editing) =>
+  editing ? STEPS.filter((s) => s.id !== "photos") : STEPS;
+
+/* ---------------- photo rules ---------------- */
+export const MAX_PHOTOS = 8;
+export const MAX_PHOTO_MB = 5;
+export const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 export const INITIAL_VALUES = {
   brand: "",
   model: "",
@@ -41,6 +56,7 @@ export const INITIAL_VALUES = {
   price: "",
   title: "",
   description: "",
+  photos: [], // [{ id, file, url }]  (optional)
   confirm: false,
 };
 
@@ -104,7 +120,7 @@ export function validateStep(stepId, v) {
   if (stepId === "pricing") {
     if (v.price === "") e.price = "Enter your asking price";
     else if (Number(v.price) < 1) e.price = "Price must be greater than 0";
-    else if (Number(v.price) > 10000000) e.price = "That price looks too high";
+    else if (Number(v.price) > 100000000) e.price = "That price looks too high";
 
     const title = trim(v.title);
     if (title.length < 10) e.title = "Write a title of at least 10 characters";
@@ -122,9 +138,11 @@ export function validateStep(stepId, v) {
   return e;
 }
 
-// first step (index) that has a problem, or -1
-export function firstInvalidStep(v) {
-  return STEPS.slice(0, 3).findIndex((s) => Object.keys(validateStep(s.id, v)).length > 0);
+// first step (index in `steps`) that has a problem, or -1. Photos & review are never checked here.
+export function firstInvalidStep(v, steps = STEPS) {
+  return steps.findIndex(
+    (s) => !["photos", "review"].includes(s.id) && Object.keys(validateStep(s.id, v)).length > 0
+  );
 }
 
 export const suggestTitle = (v) =>
@@ -132,8 +150,8 @@ export const suggestTitle = (v) =>
 
 /* ---------------- request body ----------------
    Keys match your Postman request exactly (snake_case). */
-export function buildPayload(v) {
-  return {
+export function buildPayload(v, { editing = false } = {}) {
+  const body = {
     vin: trim(v.vin).toUpperCase(),
     brand: trim(v.brand),
     model: trim(v.model),
@@ -143,8 +161,51 @@ export function buildPayload(v) {
     fuel_type: v.fuelType,
     transmission_type: v.transmission,
     price: Number(v.price),
-    status: "Available", // not chosen by the user
     title_header: trim(v.title),
     description: trim(v.description),
   };
+  // new listings start as Available; on update the server keeps the current status
+  if (!editing) body.status = "Available";
+  return body;
+}
+
+/* ---------------- edit mode: car from the API -> form values ---------------- */
+const matchOption = (options, value) =>
+  options.find((o) => o.value.toLowerCase() === String(value ?? "").toLowerCase())?.value ?? "";
+
+export const carToValues = (car) => ({
+  ...INITIAL_VALUES,
+  brand: car.brand ?? "",
+  model: car.model ?? "",
+  year: car.year != null ? String(car.year) : "",
+  color: car.color ?? "",
+  vin: car.vin ?? "",
+  mileage: car.mileage != null ? String(car.mileage) : "",
+  fuelType: matchOption(FUEL_TYPES, car.fuelType),
+  transmission: matchOption(TRANSMISSIONS, car.transmission),
+  price: car.price != null ? String(Math.round(car.price)) : "",
+  title: car.headline ?? "",
+  description: car.description ?? "",
+  confirm: true, // no "I confirm" checkbox when editing
+});
+
+/* ---------------- photo files: validate + wrap ---------------- */
+// returns { added: [{id,file,url}], rejected: ["reason", ...] }
+export function acceptPhotos(fileList, existing = []) {
+  const added = [];
+  const rejected = [];
+  const have = new Set(existing.map((p) => p.id));
+
+  for (const file of Array.from(fileList)) {
+    const id = `${file.name}-${file.size}-${file.lastModified}`;
+    if (!PHOTO_TYPES.includes(file.type)) rejected.push(`${file.name}: only JPG, PNG or WebP images`);
+    else if (file.size > MAX_PHOTO_MB * 1024 * 1024) rejected.push(`${file.name}: larger than ${MAX_PHOTO_MB} MB`);
+    else if (have.has(id)) rejected.push(`${file.name}: already added`);
+    else if (existing.length + added.length >= MAX_PHOTOS) rejected.push(`${file.name}: you can add up to ${MAX_PHOTOS} photos`);
+    else {
+      have.add(id);
+      added.push({ id, file, url: URL.createObjectURL(file) });
+    }
+  }
+  return { added, rejected };
 }

@@ -11,6 +11,8 @@ export const ENDPOINTS = {
   myListings: "/api/v1/cars/my-listings", // GET -> cars owned by the logged-in user
   savedCars: "/api/v1/favourites", // GET = my saved cars, GET /ids, PUT|DELETE /{carId}
   listCar: "/api/v1/cars/list-car", // POST -> create a new listing (your working Postman URL)
+  car: (id) => `/api/v1/cars/${encodeURIComponent(id)}`, // PUT -> update, DELETE -> remove (owner only)
+  carPhotos: (id) => `/api/v1/cars/${encodeURIComponent(id)}/photos`, // POST multipart (not built yet)
   changeEmail: "/api/v1/users/me/email", // PUT { newEmail, currentPassword }
   changePassword: "/api/v1/users/me/password", // PUT { currentPassword, newPassword }
 };
@@ -112,7 +114,9 @@ async function fetchCars(path) {
   }
 }
 
-export const getMyListings = () => fetchCars(ENDPOINTS.myListings);
+// INACTIVE = removed by the owner (kept in the DB only for transaction history) -> never show it
+export const getMyListings = async () =>
+  (await fetchCars(ENDPOINTS.myListings)).filter((c) => c.status !== "INACTIVE");
 
 // no favourites API yet -> empty list (shows the friendly empty state)
 export const getSavedCars = () =>
@@ -121,6 +125,23 @@ export const getSavedCars = () =>
 // payload keys are snake_case, exactly like your Postman request
 export const createCar = (payload) =>
   apiFetch(ENDPOINTS.listCar, { method: "POST", auth: true, body: payload });
+
+// PUT /api/v1/cars/{id} — same snake_case body as create (the server ignores `status`)
+export const updateCar = (id, payload) =>
+  apiFetch(ENDPOINTS.car(id), { method: "PUT", auth: true, body: payload });
+
+// DELETE /api/v1/cars/{id} — the server decides: hard delete, or INACTIVE if the car has order history
+export const deleteCar = (id) => apiFetch(ENDPOINTS.car(id), { method: "DELETE", auth: true });
+
+// Photos are optional. Flip this to true once POST /api/v1/cars/{id}/photos exists.
+export const PHOTO_UPLOAD_ENABLED = false;
+
+// files: File[] (already validated) — sent as multipart under the field name "photos"
+export function uploadCarPhotos(carId, files) {
+  const form = new FormData();
+  files.forEach((f) => form.append("photos", f));
+  return apiFetch(ENDPOINTS.carPhotos(carId), { method: "POST", auth: true, body: form });
+}
 
 /* ------------------------------------------------------------------ */
 /* favourites (saved cars)                                            */

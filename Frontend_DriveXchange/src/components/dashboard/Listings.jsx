@@ -1,7 +1,9 @@
 // src/components/dashboard/ListingsTab.jsx
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import CarTile from "./CarTile";
-import { EmptyState, ErrorBanner, Icons, SectionHeader, Skeleton } from "./ui";
+import { EmptyState, ErrorBanner, Icons, Modal, SectionHeader, Skeleton } from "./ui";
+import { deleteCar } from "../../api/dashboardApi";
 
 export const TileSkeletons = ({ count = 3 }) => (
   <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
@@ -18,8 +20,64 @@ export const TileSkeletons = ({ count = 3 }) => (
   </div>
 );
 
-export default function ListingsTab({ data }) {
-  const { listings, loading, errors, reload } = data;
+/* "Are you sure?" dialog for removing a listing */
+function DeleteDialog({ car, onClose, onDeleted, notify }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const confirm = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      await deleteCar(car.id); // DELETE /api/v1/cars/{id}
+      onDeleted(car.id);
+      notify("Listing removed");
+      onClose();
+    } catch (err) {
+      // 409 = the car got reserved in the meantime
+      setError(err.message || "Could not remove this listing. Please try again.");
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Modal title="Remove this listing?" subtitle={car.name} onClose={busy ? () => {} : onClose}>
+      <p className="text-sm leading-6 text-[#5f5f5f]">
+        Buyers will no longer be able to find or open this car. Anyone who saved it will see it disappear
+        from their list. This can't be undone — you'd have to list the car again.
+      </p>
+
+      {error && (
+        <div className="mt-4">
+          <ErrorBanner message={error} />
+        </div>
+      )}
+
+      <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={busy}
+          className="rounded-xl border border-[#e6e2da] bg-white px-5 py-3 text-sm font-semibold text-[#1c1c1e] transition hover:border-[#1a6bff] disabled:opacity-60"
+        >
+          Keep listing
+        </button>
+        <button
+          type="button"
+          onClick={confirm}
+          disabled={busy}
+          className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {busy ? "Removing…" : "Yes, remove it"}
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+export default function ListingsTab({ data, notify }) {
+  const { listings, loading, errors, reload, removeListing } = data;
+  const [toDelete, setToDelete] = useState(null);
 
   return (
     <div>
@@ -58,9 +116,18 @@ export default function ListingsTab({ data }) {
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {listings.map((car) => (
-            <CarTile key={car.id} car={car} showStatus />
+            <CarTile key={car.id} car={car} showStatus onDelete={setToDelete} />
           ))}
         </div>
+      )}
+
+      {toDelete && (
+        <DeleteDialog
+          car={toDelete}
+          notify={notify}
+          onClose={() => setToDelete(null)}
+          onDeleted={removeListing}
+        />
       )}
     </div>
   );

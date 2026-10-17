@@ -37,7 +37,9 @@ export class ApiError extends Error {
    apiFetch("/api/v1/users/me", { auth: true })   -> adds Authorization header
    apiFetch("/api/v1/auth/login", { method: "POST", body: {...} })        */
 export async function apiFetch(path, { method = "GET", body, auth = false, signal } = {}) {
-  const headers = { "Content-Type": "application/json" };
+  // FormData (file upload): the browser sets the multipart Content-Type itself
+  const isForm = typeof FormData !== "undefined" && body instanceof FormData;
+  const headers = isForm ? {} : { "Content-Type": "application/json" };
 
   if (auth) {
     const token = tokenStorage.get();
@@ -49,7 +51,7 @@ export async function apiFetch(path, { method = "GET", body, auth = false, signa
     res = await fetch(`${BASE_URL}${path}`, {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
       signal, // lets callers cancel a request that is no longer needed
     });
   } catch (err) {

@@ -3,31 +3,37 @@
 import { Card, Icons } from "../dashboard/ui";
 import { formatMileage, formatPrice } from "../dashboard/format";
 
-const TIPS = [
-  [
+const TIPS = {
+  vehicle: [
     "Double-check the VIN — buyers use it to verify the car's history.",
     "Use the exact model name as printed on the registration papers.",
   ],
-  [
+  specs: [
     "Be accurate with mileage; buyers compare it against service records.",
     "Pick the fuel type and transmission exactly as the car is.",
   ],
-  [
+  photos: [
+    "Shoot in daylight and keep the whole car in the frame.",
+    "Add the interior and dashboard — buyers look for them first.",
+  ],
+  pricing: [
     "Price close to similar cars in your area to get more enquiries.",
     "Mention service history, recent repairs and extras in the description.",
   ],
-  [
+  review: [
     "Read through the summary once more — you can edit any section.",
-    "You can manage the listing later from My Listings.",
+    "You can edit or remove the listing later from My Listings.",
   ],
-];
+};
 
 const TRACKED = ["brand", "model", "year", "color", "vin", "mileage", "fuelType", "transmission", "price", "title", "description"];
 
-export default function Preview({ values, step }) {
+export default function Preview({ values, stepId, coverUrl = null }) {
   const name = [values.brand, values.model].filter(Boolean).join(" ") || "Your car";
-  const filled = TRACKED.filter((k) => String(values[k]).trim() !== "").length;
-  const percent = Math.round((filled / TRACKED.length) * 100);
+  const cover = values.photos?.[0]?.url ?? coverUrl;
+  const filled =
+    TRACKED.filter((k) => String(values[k]).trim() !== "").length + (values.photos?.length ? 1 : 0);
+  const percent = Math.round((filled / (TRACKED.length + 1)) * 100);
 
   const specs = [
     values.mileage !== "" && formatMileage(values.mileage),
@@ -41,8 +47,12 @@ export default function Preview({ values, step }) {
         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#a8a59e]">Live preview</p>
 
         <article className="overflow-hidden rounded-2xl border border-[#efece6] bg-white shadow-[0_10px_28px_rgba(30,25,15,0.08)]">
-          <div className="relative grid aspect-[16/10] place-items-center bg-gradient-to-b from-[#f4f2ee] to-[#e4e6ea] text-[#b9b4a9]">
-            <Icons.car width={56} height={56} />
+          <div className="relative grid aspect-[16/10] place-items-center overflow-hidden bg-gradient-to-b from-[#f4f2ee] to-[#e4e6ea] text-[#b9b4a9]">
+            {cover ? (
+              <img src={cover} alt="Cover photo" className="absolute inset-0 h-full w-full object-cover" />
+            ) : (
+              <Icons.car width={56} height={56} />
+            )}
             <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[11px] font-semibold text-[#0f766e]">
               <Icons.check width={11} height={11} /> Available
             </span>
@@ -54,7 +64,7 @@ export default function Preview({ values, step }) {
                 {name}
               </h3>
               <span className={`whitespace-nowrap font-['Fraunces',Georgia,serif] text-lg font-bold ${values.price ? "text-[#1a6bff]" : "text-[#c9c5bb]"}`}>
-                {values.price ? formatPrice(values.price) : "$0"}
+                {values.price ? formatPrice(values.price) : "₹0"}
               </span>
             </div>
             <p className="mt-1.5 text-sm text-[#8c8c8c]">
@@ -78,7 +88,7 @@ export default function Preview({ values, step }) {
         </div>
 
         <ul className="mt-4 space-y-2.5">
-          {TIPS[step].map((t) => (
+          {(TIPS[stepId] ?? TIPS.vehicle).map((t) => (
             <li key={t} className="flex items-start gap-2.5 text-xs leading-5 text-[#6b6b6b]">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1a6bff]" />
               {t}
