@@ -12,4 +12,5 @@ public interface CarRepository extends JpaRepository<CarEntity, UUID>{
 	List<CarEntity> findByUser_Email(String email);
 	
 	Optional<CarEntity> findByVin(String vin);
+	
 }

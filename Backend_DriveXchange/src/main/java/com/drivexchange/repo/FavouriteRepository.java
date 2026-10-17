@@ -22,4 +22,6 @@ public interface FavouriteRepository extends JpaRepository<FavouriteEntity, UUID
 	
 	@Query("select f from FavouriteEntity f join fetch f.car where f.user.id = :userId order by f.created_at desc")
     List<FavouriteEntity> findAllWithCarByUserId(@Param("userId") UUID userId);
+
+	void deleteByCar_Id(UUID id);
 }

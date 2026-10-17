@@ -8,9 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.drivexchange.dto.ApiResponse;
 import com.drivexchange.dto.CarBrowseResponse;
 import com.drivexchange.dto.CarDetailResponse;
+import com.drivexchange.dto.CarUpdateRequest;
 import com.drivexchange.dto.MyCarResponse;
 import com.drivexchange.entity.CarEntity;
 import com.drivexchange.entity.UserEntity;
@@ -40,8 +43,8 @@ public class CarController {
 	@PostMapping("/list-car")
 	public ResponseEntity<ApiResponse<Void>> listCar(@RequestBody CarEntity car, @AuthenticationPrincipal UserDetails userDetails){
 		String email = userDetails.getUsername();
-		
-		UserEntity user = userService.getUserEntityByEmail(email);
+				
+		UserEntity user = userService.getUserEntityByEmail(email); // Instead of this email --> userDetails.getUsername() to save one variable
 		car.setUser(user);
 				
 		carService.ListCar(car);
@@ -64,10 +67,24 @@ public class CarController {
 	
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<ApiResponse<CarDetailResponse>> getCarFromID(@PathVariable  UUID id){
-		CarDetailResponse  response = carService.getCarFromId(id);
+	public ResponseEntity<ApiResponse<CarDetailResponse>> getCarFromID(@PathVariable  UUID id, @AuthenticationPrincipal UserDetails userDetails){
+		String email = userDetails != null ? userDetails.getUsername() : null;
+		CarDetailResponse  response = carService.getCarFromId(id, email);
 		
 		return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Car Details Fetched", response));
+	}
+	
+	@PutMapping("/{id}")
+	public ResponseEntity<ApiResponse<Void>> editCarDetails(@PathVariable UUID id, Authentication authentication, @RequestBody CarUpdateRequest car){
+		carService.updateCarDetails(id, car, authentication.getName());
+		return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Car updated successfully", null));
+	}
+	
+	
+	@DeleteMapping("/{id}")
+	public ResponseEntity<ApiResponse<Void>> deleteCar(@PathVariable UUID id, Authentication authentication) {
+	    carService.deleteCar(id, authentication.getName());
+	    return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Car removed successfully", null));
 	}
 
 }
