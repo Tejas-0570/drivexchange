@@ -7,6 +7,7 @@ import ProtectedRoute from "./components/ProtectedRoutes"
 import Dashboard from "./pages/Dashboard"
 import ListCar from "./pages/ListCar"
 import CarDetails from "./pages/CarDetails"
+import OrderPage from "./pages/OrderPage"
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/list-car" element={<ProtectedRoute><ListCar /></ProtectedRoute>} />
         <Route path="/cars/:id/edit" element={<ListCar />} />
         <Route path="/cars/:id" element={<ProtectedRoute><CarDetails /></ProtectedRoute>} />
+        <Route path="/transactions/:id" element={<ProtectedRoute><OrderPage /></ProtectedRoute>}/>
    </Routes>
   )
 }

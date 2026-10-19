@@ -11,12 +11,14 @@ import ProfileTab from "../components/dashboard/Profile";
 import ListingsTab from "../components/dashboard/Listings";
 import SavedTab from "../components/dashboard/Saved";
 import SecurityTab from "../components/dashboard/SecurityTab";
+import OrdersTab from "../components/dashboard/OrdersTab";
 
 const TABS = [
   { id: "overview", label: "Overview", icon: "overview" },
   { id: "profile", label: "My Profile", icon: "user" },
   { id: "listings", label: "My Listings", icon: "car" },
   { id: "saved", label: "Saved Cars", icon: "heart" },
+  { id: "orders", label: "My Orders", icon: "receipt" },
   { id: "security", label: "Security", icon: "shield" },
 ];
 
@@ -64,7 +66,7 @@ export default function Dashboard() {
         {/* mobile: horizontal tab bar */}
         <nav aria-label="Dashboard sections" className="-mx-4 mb-6 flex gap-2 overflow-x-auto px-4 pb-1 lg:hidden">
           {TABS.map((t) => {
-            const Icon = Icons[t.icon];
+            const Icon = Icons[t.icon] ?? Icons.lock;
             const active = tab === t.id;
             return (
               <button
@@ -121,7 +123,7 @@ export default function Dashboard() {
               <Card className="p-2">
                 <nav aria-label="Dashboard sections" className="flex flex-col gap-1">
                   {TABS.map((t) => {
-                    const Icon = Icons[t.icon];
+                    const Icon = Icons[t.icon] ?? Icons.lock;
                     const active = tab === t.id;
                     const count = counts[t.id];
                     return (
@@ -192,6 +194,7 @@ export default function Dashboard() {
                 {tab === "profile" && <ProfileTab onNavigate={go} notify={notify} />}
                 {tab === "listings" && <ListingsTab data={data} notify={notify} />}
                 {tab === "saved" && <SavedTab data={data} />}
+                {tab === "orders" && <OrdersTab />}
                 {tab === "security" && <SecurityTab notify={notify} />}
               </div>
             )}

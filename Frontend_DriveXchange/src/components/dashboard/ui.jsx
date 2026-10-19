@@ -96,6 +96,12 @@ export const Icons = {
       <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
     </svg>
   ),
+  receipt: (p) => (
+    <svg {...ic} {...p}>
+      <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" />
+      <path d="M9 8h6M9 12h6" />
+    </svg>
+  ),
   close: (p) => (
     <svg {...ic} {...p}>
       <path d="M6 6l12 12M18 6L6 18" />

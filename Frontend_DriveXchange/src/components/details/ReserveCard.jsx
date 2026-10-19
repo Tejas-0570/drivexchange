@@ -3,7 +3,8 @@
 // phone / email: buyers and sellers connect only through Drivexchange.
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Card, Icons, Modal, Pill } from "../dashboard/ui";
+import { Card, Icons, Pill } from "../dashboard/ui";
+import BookingModal from "./BookingModal";
 import { formatMonthYear, formatPrice } from "../dashboard/format";
 
 const STATUS = {
@@ -13,7 +14,7 @@ const STATUS = {
 };
 
 const STEPS = [
-  ["Reserve", "Pay a small, refundable booking amount to hold the car for you."],
+  ["Reserve", "Pay a small booking amount online to hold the car for you."],
   ["Inspect & test drive", "Meet the seller through Drivexchange and check the car in person."],
   ["Pay & take delivery", "Pay the balance. The seller is paid only after you confirm delivery."],
 ];
@@ -115,22 +116,7 @@ export default function ReserveCard({ car, isOwner, isLoggedIn }) {
         Pay only through Drivexchange. Never send money to a seller directly.
       </p>
 
-      {/* placeholder until payments are built */}
-      {open && (
-        <Modal title="Reserve this car" subtitle={car.headline || car.name} onClose={() => setOpen(false)}>
-          <p className="text-sm leading-6 text-[#5f5f5f]">
-            Online booking is almost ready. Soon you'll pay a small refundable amount here to hold this car,
-            and we'll connect you with the seller safely.
-          </p>
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            className="mt-6 w-full rounded-xl bg-[#1a6bff] py-3 text-sm font-semibold text-white transition hover:bg-[#0f5ae6]"
-          >
-            Got it
-          </button>
-        </Modal>
-      )}
+      {open && <BookingModal car={car} onClose={() => setOpen(false)} />}
     </Card>
   );
 }
