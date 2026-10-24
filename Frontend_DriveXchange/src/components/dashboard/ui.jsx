@@ -174,6 +174,7 @@ export const Pill = ({ tone = "blue", children }) => {
     green: "bg-[#e3f1ef] text-[#0f766e]",
     amber: "bg-[#fdf1dc] text-[#b45309]",
     gray: "bg-[#efece6] text-[#6b6b6b]",
+    red: "bg-[#fdecec] text-[#b42318]",
   };
   return (
     <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${tones[tone]}`}>

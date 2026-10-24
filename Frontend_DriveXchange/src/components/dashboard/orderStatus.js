@@ -16,10 +16,10 @@ export const ORDER_STATUS = {
     seller: "A buyer has paid the booking amount. Contact them to arrange the inspection.",
   },
   DELIVERED: {
-    label: "Delivered",
+    label: "Delivery confirmed",
     tone: "blue",
-    buyer: "You confirmed delivery. The seller will be paid shortly.",
-    seller: "The buyer confirmed delivery. Your payout is being processed.",
+    buyer: "Drivexchange confirmed the car was delivered to you. The seller will be paid shortly.",
+    seller: "Drivexchange confirmed the delivery. Your payout is being processed.",
   },
   RELEASED: {
     label: "Completed",
