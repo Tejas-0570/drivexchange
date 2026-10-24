@@ -31,7 +31,7 @@ const NavLink = ({ href, className, onClick, children }) =>
 
 /* ---------------- avatar + dropdown (logged-in state) ---------------- */
 function ProfileMenu() {
-  const { user, profile, logout } = useAuth();
+  const { user, profile, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -95,6 +95,16 @@ function ProfileMenu() {
             </svg>
             My Dashboard
           </Link>
+          {isAdmin && (
+            <Link
+              to="/admin"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 border-t border-[#efece6] px-4 py-3 text-sm font-semibold text-[#1a6bff] transition-colors hover:bg-[#e8f0ff]"
+            >
+              Admin Console
+            </Link>
+          )}
 
           <button
             type="button"
@@ -115,7 +125,7 @@ function ProfileMenu() {
 
 /* ---------------- navbar ---------------- */
 export default function Navbar() {
-  const { isLoggedIn, logout } = useAuth();
+  const { isLoggedIn, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
@@ -206,6 +216,11 @@ export default function Navbar() {
                 >
                   My Dashboard
                 </Link>
+                {isAdmin && (
+                  <Link to="/admin" onClick={() => setOpen(false)} className="font-semibold text-[#1a6bff]">
+                    Admin Console
+                  </Link>
+                )}
                 <button type="button" onClick={handleMobileLogout} className="text-[17px] font-medium text-red-600">
                   Log out
                 </button>
