@@ -41,7 +41,9 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final CarRepository carRepository;
 
-    public PaymentService(PaymentGatewayService gateway, TransactionRepository transactionRepository, PaymentRepository paymentRepository, CarRepository carRepository) {
+    public PaymentService(PaymentGatewayService gateway, TransactionService transactionService,
+                          TransactionRepository transactionRepository, PaymentRepository paymentRepository,
+                          CarRepository carRepository) {
         this.gateway = gateway;
         this.transactionRepository = transactionRepository;
         this.paymentRepository = paymentRepository;

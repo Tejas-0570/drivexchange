@@ -81,6 +81,22 @@ public class TransactionEntity {
     @Column(name = "paid_at")
     private Instant paidAt;
 
+    // ---- admin phase: delivery, payout, refund -------------------------------------------
+    @Column(name = "delivered_at")
+    private Instant deliveredAt;
+
+    @Column(name = "payout_reference", length = 100)
+    private String payoutReference;      // bank UTR / UPI ref the admin typed when paying the seller
+
+    @Column(name = "payout_released_at")
+    private Instant payoutReleasedAt;
+
+    @Column(name = "refunded_at")
+    private Instant refundedAt;
+
+    @Column(name = "refund_reason", length = 1000)
+    private String refundReason;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -138,6 +154,17 @@ public class TransactionEntity {
 
     public Instant getPaidAt() { return paidAt; }
     public void setPaidAt(Instant paidAt) { this.paidAt = paidAt; }
+
+    public Instant getDeliveredAt() { return deliveredAt; }
+    public void setDeliveredAt(Instant v) { this.deliveredAt = v; }
+    public String getPayoutReference() { return payoutReference; }
+    public void setPayoutReference(String v) { this.payoutReference = v; }
+    public Instant getPayoutReleasedAt() { return payoutReleasedAt; }
+    public void setPayoutReleasedAt(Instant v) { this.payoutReleasedAt = v; }
+    public Instant getRefundedAt() { return refundedAt; }
+    public void setRefundedAt(Instant v) { this.refundedAt = v; }
+    public String getRefundReason() { return refundReason; }
+    public void setRefundReason(String v) { this.refundReason = v; }
 
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }

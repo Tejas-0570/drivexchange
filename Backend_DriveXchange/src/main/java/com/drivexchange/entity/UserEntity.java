@@ -1,5 +1,6 @@
 package com.drivexchange.entity;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
@@ -9,6 +10,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -44,6 +47,25 @@ public class UserEntity {
 	private String mobile;
 	
 	private LocalDateTime createdAt;
+
+	// ---- admin: suspension -------------------------------------------------------------
+	@Enumerated(EnumType.STRING)
+	@Column(name = "account_status", length = 20)
+	private UserStatus status = UserStatus.ACTIVE;
+
+	@Column(name = "suspension_reason", length = 1000)
+	private String suspensionReason;
+
+	@Column(name = "suspended_at")
+	private Instant suspendedAt;
+
+	public UserStatus getStatus() { return status; }
+	public void setStatus(UserStatus status) { this.status = status; }
+	public String getSuspensionReason() { return suspensionReason; }
+	public void setSuspensionReason(String suspensionReason) { this.suspensionReason = suspensionReason; }
+	public Instant getSuspendedAt() { return suspendedAt; }
+	public void setSuspendedAt(Instant suspendedAt) { this.suspendedAt = suspendedAt; }
+
 	public UUID getId() {
 		return id;
 	}
@@ -88,12 +110,10 @@ public class UserEntity {
 		this.createdAt = createdAt;
 	}
 	
-	
-	
 	@Override
 	public String toString() {
-		return "UserEntity [id=" + id + ", name=" + name + ", email=" + email + ", password=" + password + ", role="
-				+ role + ", mobileNo=" + mobile + ", createdAt=" + createdAt + "]";
+		return "UserEntity [id=" + id + ", name=" + name + ", email=" + email + ", role="
+				+ role + ", mobileNo=" + mobile + ", createdAt=" + createdAt + "]";   // password removed from logs
 	}
 	@PrePersist
 	protected void onCreate() {

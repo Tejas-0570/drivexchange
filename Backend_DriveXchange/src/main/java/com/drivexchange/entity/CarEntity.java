@@ -1,11 +1,14 @@
 package com.drivexchange.entity;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -81,6 +84,34 @@ public class CarEntity {
 	@ManyToOne
 	@JoinColumn(name = "user_id", nullable = false)
 	private UserEntity user;
+
+	// 6. Admin review (new listings wait for approval)
+	@Enumerated(EnumType.STRING)
+	@Column(name = "approval_status", length = 20)
+	private ApprovalStatus approvalStatus = ApprovalStatus.PENDING;
+
+	@Column(name = "rejection_reason", length = 1000)
+	private String rejectionReason;
+
+	@Column(name = "submitted_at")
+	private Instant submittedAt = Instant.now();
+
+	@Column(name = "reviewed_at")
+	private Instant reviewedAt;
+
+	@Column(name = "reviewed_by")
+	private String reviewedBy;
+
+	public ApprovalStatus getApprovalStatus() { return approvalStatus; }
+	public void setApprovalStatus(ApprovalStatus approvalStatus) { this.approvalStatus = approvalStatus; }
+	public String getRejectionReason() { return rejectionReason; }
+	public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
+	public Instant getSubmittedAt() { return submittedAt; }
+	public void setSubmittedAt(Instant submittedAt) { this.submittedAt = submittedAt; }
+	public Instant getReviewedAt() { return reviewedAt; }
+	public void setReviewedAt(Instant reviewedAt) { this.reviewedAt = reviewedAt; }
+	public String getReviewedBy() { return reviewedBy; }
+	public void setReviewedBy(String reviewedBy) { this.reviewedBy = reviewedBy; }
 
 	public UUID getId() {
 		return id;
