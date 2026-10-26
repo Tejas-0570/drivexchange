@@ -307,7 +307,7 @@ function ListCarForm({ carId }) {
               {published.updated ? (
                 <>Your changes to “{published.title}” are live.</>
               ) : (
-                <>“{published.title}” is now live as <strong className="text-[#1c1c1e]">Available</strong>. You can see it in My Listings.</>
+                <>“{published.title}” was submitted. Our team will review it, and it goes live once approved. You can follow it in <strong className="text-[#1c1c1e]">My Listings</strong>.</>
               )}
             </p>
             {published.photoWarning && (

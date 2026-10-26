@@ -3,7 +3,7 @@
 // If your Spring controllers use different URLs / field names, change them
 // in this ONE file and the rest of the dashboard keeps working.
 
-import { ApiError, apiFetch } from "./api";
+import { ApiError, tokenStorage, apiFetch } from "./api";
 
 /* ⚠️  CHANGE THESE to match your Spring controllers */
 export const ENDPOINTS = {
@@ -134,13 +134,29 @@ export const updateCar = (id, payload) =>
 export const deleteCar = (id) => apiFetch(ENDPOINTS.car(id), { method: "DELETE", auth: true });
 
 // Photos are optional. Flip this to true once POST /api/v1/cars/{id}/photos exists.
-export const PHOTO_UPLOAD_ENABLED = false;
+export const PHOTO_UPLOAD_ENABLED = true;
 
 // files: File[] (already validated) — sent as multipart under the field name "photos"
-export function uploadCarPhotos(carId, files) {
+export async function uploadCarPhotos(carId, files) {
   const form = new FormData();
   files.forEach((f) => form.append("photos", f));
-  return apiFetch(ENDPOINTS.carPhotos(carId), { method: "POST", auth: true, body: form });
+
+  const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8081";
+  let res;
+  try {
+    res = await fetch(`${BASE_URL}/api/v1/cars/${carId}/photos`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${tokenStorage.get()}` },
+      body: form,
+    });
+  } catch {
+    throw new ApiError("Cannot reach the server. Please try again.", 0);
+  }
+
+  let data = null;
+  try { data = await res.json(); } catch { /* ignore */ }
+  if (!res.ok) throw new ApiError(data?.message || `Upload failed (${res.status})`, res.status, data);
+  return data?.data ?? [];
 }
 
 /* ------------------------------------------------------------------ */
