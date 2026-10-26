@@ -1,5 +1,6 @@
 package com.drivexchange.dao;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ import com.drivexchange.dto.CarDetailResponse;
 import com.drivexchange.dto.CarUpdateRequest;
 import com.drivexchange.dto.MyCarResponse;
 import com.drivexchange.dto.UserPublicResponse;
+import com.drivexchange.entity.ApprovalStatus;
 import com.drivexchange.entity.CarEntity;
 import com.drivexchange.entity.UserEntity;
 import com.drivexchange.exceptions.CarAlreadyExistsException;
@@ -34,11 +36,19 @@ public class CarDao implements CarService{
 	}
 
 	@Override
-	public void ListCar(CarEntity car) {
+	public UUID ListCar(CarEntity car) {
 		if(carRepository.findByVin(car.getVin()).isPresent()) {
 			throw new CarAlreadyExistsException("Car Already Exists with this VIN");
 		}
-		carRepository.save(car);
+		car.setId(null);
+		car.setStatus("Available");
+		car.setApprovalStatus(ApprovalStatus.PENDING);
+		car.setRejectionReason(null);
+		car.setReviewedAt(null);
+		car.setReviewedBy(null);
+		car.setSubmittedAt(Instant.now());
+		car.setPhotUrls(new java.util.ArrayList<>());
+		return carRepository.save(car).getId();
 	}
 
 	@Override

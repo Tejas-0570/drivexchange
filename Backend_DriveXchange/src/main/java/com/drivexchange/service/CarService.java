@@ -12,7 +12,7 @@ import com.drivexchange.entity.CarEntity;
 
 public interface CarService {
 
-	public void ListCar(CarEntity car);
+	public UUID ListCar(CarEntity car);
 	
 	public List<MyCarResponse> getCarsByOwnerEmail(String email);
 	

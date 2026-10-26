@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.drivexchange.entity.ApprovalStatus;
 import com.drivexchange.entity.CarEntity;
+import com.drivexchange.entity.UserStatus;
 
 import jakarta.persistence.LockModeType;
 
@@ -30,6 +31,9 @@ public interface CarRepository extends JpaRepository<CarEntity, UUID>{
 			+ "lower(coalesce(c.title_header,'')) like :q or lower(c.vin) like :q "
 			+ "or lower(c.user.name) like :q or lower(c.user.email) like :q)")
 	Page<CarEntity> adminSearch(@Param("approval") ApprovalStatus approval, @Param("q") String q, Pageable pageable);
+	
+	// public browse: approved cars whose owner is not suspended
+	List<CarEntity> findByApprovalStatusAndUser_Status(ApprovalStatus approval, UserStatus ownerStatus);
 
 	long countByApprovalStatus(ApprovalStatus status);
 
