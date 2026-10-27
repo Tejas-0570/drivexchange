@@ -16,6 +16,11 @@ const STATUS = {
   INACTIVE: { label: "Removed", tone: "gray" },
 };
 
+const APPROVAL = {
+  PENDING: { label: "In review", tone: "amber" },
+  REJECTED: { label: "Rejected", tone: "red" },
+};
+
 // a reserved car has a buyer's money on hold and a sold car is history -> owner can't change them
 const LOCKED = ["RESERVED", "SOLD"];
 const LOCK_REASON = {
@@ -38,6 +43,7 @@ const TrashIcon = () => (
 export default function CarTile({ car, showStatus = false, onRemove, onDelete }) {
   const [imgFailed, setImgFailed] = useState(false);
   const status = STATUS[car.status] ?? STATUS.ACTIVE;
+  const badge = (showStatus && APPROVAL[car.approvalStatus]) || status;
   const locked = LOCKED.includes(car.status);
   const specs = [
     car.mileage != null && formatMileage(car.mileage),
@@ -67,7 +73,7 @@ export default function CarTile({ car, showStatus = false, onRemove, onDelete })
         )}
         {showStatus && (
           <span className="absolute left-3 top-3">
-            <Pill tone={status.tone}>{status.label}</Pill>
+            <Pill tone={badge.tone}>{badge.label}</Pill>
           </span>
         )}
 
@@ -111,6 +117,16 @@ export default function CarTile({ car, showStatus = false, onRemove, onDelete })
         >
           View details <Icons.arrow width={14} height={14} />
         </Link>
+                {showStatus && car.approvalStatus === "PENDING" && (
+          <p className="mt-3 rounded-lg bg-[#fdf1dc] px-3 py-2 text-xs text-[#8a6100]">
+            Our team is checking this listing. It goes live once approved.
+          </p>
+        )}
+        {showStatus && car.approvalStatus === "REJECTED" && (
+          <p className="mt-3 rounded-lg bg-[#fdecec] px-3 py-2 text-xs text-[#b42318]">
+            Not approved{car.rejectionReason ? `: ${car.rejectionReason}` : "."} Edit the listing to fix it and send it back for review.
+          </p>
+        )}
 
         {/* My Listings: Edit + Delete */}
         {onDelete && (

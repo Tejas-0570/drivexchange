@@ -95,6 +95,8 @@ export function normalizeCar(raw = {}) {
     image: c.image ?? c.imageUrl ?? c.image_url ?? photo,
     status: String(c.status ?? "AVAILABLE").toUpperCase(),
     verified: Boolean(c.verified ?? c.isVerified), // badge only shows if the backend says so
+    approvalStatus: c.approvalStatus ?? null,       // PENDING | APPROVED | REJECTED
+    rejectionReason: c.rejectionReason ?? "",
   };
 }
 

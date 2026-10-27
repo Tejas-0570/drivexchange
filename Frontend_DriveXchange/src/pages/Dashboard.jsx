@@ -8,7 +8,7 @@ import { Card, ErrorBanner, Icons, Pill, Skeleton, useToast } from "../component
 import { isAdminRole } from "../components/dashboard/format";
 import OverviewTab from "../components/dashboard/Overview";
 import ProfileTab from "../components/dashboard/Profile";
-import ListingsTab from "../components/dashboard/Listings";
+import ListingsTab from "../components/dashboard/ListingsTab";
 import SavedTab from "../components/dashboard/Saved";
 import SecurityTab from "../components/dashboard/SecurityTab";
 import OrdersTab from "../components/dashboard/OrdersTab";

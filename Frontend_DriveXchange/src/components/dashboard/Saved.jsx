@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import CarTile from "./CarTile";
 import { useFavourites } from "../../context/FavouritesContext";
-import { TileSkeletons } from "./Listings";
+import { TileSkeletons } from "./ListingsTab";
 import { EmptyState, ErrorBanner, SectionHeader } from "./ui";
 
 export default function SavedTab({ data }) {

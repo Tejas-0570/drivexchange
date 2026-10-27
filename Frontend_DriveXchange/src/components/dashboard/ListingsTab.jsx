@@ -4,8 +4,6 @@ import { Link } from "react-router-dom";
 import CarTile from "./CarTile";
 import { EmptyState, ErrorBanner, Icons, Modal, SectionHeader, Skeleton } from "./ui";
 import { deleteCar } from "../../api/dashboardApi";
-import { ApprovalBadge, ApprovalNote, isLive } from "./approval";
-
 
 export const TileSkeletons = ({ count = 3 }) => (
   <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
@@ -118,13 +116,7 @@ export default function ListingsTab({ data, notify }) {
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {listings.map((car) => (
-            <div key={car.id}>
-              <div className="mb-2">
-                <ApprovalBadge status={car.approvalStatus} />
-              </div>
-              <CarTile car={car} showStatus onDelete={setToDelete} />
-              <ApprovalNote status={car.approvalStatus} reason={car.rejectionReason} />
-            </div>
+            <CarTile key={car.id} car={car} showStatus onDelete={setToDelete} />
           ))}
         </div>
       )}
