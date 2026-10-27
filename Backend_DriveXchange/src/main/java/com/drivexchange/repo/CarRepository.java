@@ -40,4 +40,10 @@ public interface CarRepository extends JpaRepository<CarEntity, UUID>{
 	long countByUser_Id(UUID userId);
 
 	List<CarEntity> findTop5ByUser_IdOrderBySubmittedAtDesc(UUID userId);
+	
+	// public cars: approved, and the owner is not suspended (an empty status counts as active)
+	@Query("select c from CarEntity c where c.approvalStatus = :approval "
+			+ "and (c.user.status is null or c.user.status <> :suspended)")
+	List<CarEntity> findPublicCars(@Param("approval") ApprovalStatus approval,
+	                               @Param("suspended") UserStatus suspended);
 }

@@ -15,6 +15,7 @@ import com.drivexchange.dto.UserPublicResponse;
 import com.drivexchange.entity.ApprovalStatus;
 import com.drivexchange.entity.CarEntity;
 import com.drivexchange.entity.UserEntity;
+import com.drivexchange.entity.UserStatus;
 import com.drivexchange.exceptions.CarAlreadyExistsException;
 import com.drivexchange.exceptions.ResourceNotFoundException;
 import com.drivexchange.repo.CarRepository;
@@ -58,20 +59,12 @@ public class CarDao implements CarService{
 
 	@Override
 	public List<CarBrowseResponse> getAllCars() {
-		return carRepository.findAll().stream().map(car -> new CarBrowseResponse(
-				             car.getId(),
-				             car.getBrand(),
-				             car.getModel(),
-				             car.getPrice(),
-				             car.getStatus(),
-				             car.getManufactured_year(),
-				             car.getColor(),
-				             car.getMileage(),
-				             car.getFuel_type(),
-				             car.getTransmission_type(),
-				             car.getTitle_header(),
-				             car.getPhotUrls()
-				            
+		// only approved cars whose owner is not suspended
+		return carRepository.findPublicCars(ApprovalStatus.APPROVED, UserStatus.SUSPENDED).stream()
+				.map(car -> new CarBrowseResponse(
+						car.getId(), car.getBrand(), car.getModel(), car.getPrice(), car.getStatus(),
+						car.getManufactured_year(), car.getColor(), car.getMileage(), car.getFuel_type(),
+						car.getTransmission_type(), car.getTitle_header(), car.getPhotUrls()
 				)).toList();
 	}
 
@@ -84,6 +77,12 @@ public class CarDao implements CarService{
 	    boolean isOwner = loggedInEmail != null
 	            && owner != null
 	            && owner.getEmail().equalsIgnoreCase(loggedInEmail);
+	    
+	    boolean publicCar = car.getApprovalStatus() == ApprovalStatus.APPROVED
+	            && (owner == null || owner.getStatus() != UserStatus.SUSPENDED);
+	    if (!publicCar && !isOwner) {
+	        throw new ResourceNotFoundException("Car Not found");
+	    }
 
 	    return new CarDetailResponse(
 	            car.getId(), car.getBrand(), car.getModel(), car.getPrice(), car.getStatus(),
@@ -130,6 +129,12 @@ public class CarDao implements CarService{
 	    if (req.photUrls() != null) {
 	        car.getPhotUrls().clear();
 	        car.getPhotUrls().addAll(req.photUrls());
+	    }
+	    
+	    if (car.getApprovalStatus() == ApprovalStatus.REJECTED) {   // the owner fixed it -> back to review
+	        car.setApprovalStatus(ApprovalStatus.PENDING);
+	        car.setRejectionReason(null);
+	        car.setSubmittedAt(Instant.now());
 	    }
 
 	    carRepository.save(car);

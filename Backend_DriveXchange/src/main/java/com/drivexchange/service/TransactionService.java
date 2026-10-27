@@ -102,6 +102,9 @@ public class TransactionService {
     public QuoteResponse quote(UUID carId) {
         CarEntity car = carRepository.findById(carId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found"));
+        if (car.getApprovalStatus() != com.drivexchange.entity.ApprovalStatus.APPROVED) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found");
+        }
         long price = car.getPrice() * 100L;
         return new QuoteResponse(car.getId(), titleOf(car), AVAILABLE.equalsIgnoreCase(car.getStatus()), price,
                 bookingAmountPaise(price), booking.expiryMinutes());
@@ -118,6 +121,9 @@ public class TransactionService {
         // LOCK the car. A second buyer clicking at the same millisecond waits here, then sees "Reserved".
         CarEntity car = carRepository.findByIdForUpdate(carId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found"));
+        if (car.getApprovalStatus() != com.drivexchange.entity.ApprovalStatus.APPROVED) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Car not found");
+        }
 
         if (car.getUser().getId().equals(buyer.getId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't book your own car");
