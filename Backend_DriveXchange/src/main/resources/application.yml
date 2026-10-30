@@ -1,0 +1,15 @@
+spring:
+  profiles:
+    active: dev # Change this to 'prod' in your environment variables when deploying
+  application:
+    name: DriveXchange
+
+server:
+  port: 8081
+
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
